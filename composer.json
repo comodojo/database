@@ -1,0 +1,10 @@
+{
+    "name": "comodojo/dispatcher.library.database",
+    "description": "Database connect/query library for comodojo/dispatcher.framework",
+    "authors": [
+        {
+            "name": "comodojo",
+            "email": "devel@comodojo.org"
+        }
+    ]
+}
