@@ -1,11 +1,11 @@
-<?php namespace comodojo\DatabaseLibrary;
+<?php namespace comodojo\DispatcherLibrary;
 
 /**
- * Database connect/query plugin for comodojo/dispatcher.framework
+ * Database connect/query plugin for comodojo/dispatcher.framework	
  * 
- * @package 	Comodojo dispatcher (Spare Parts)
+ * @package		Comodojo dispatcher (Spare Parts)
  * @author		comodojo <info@comodojo.org>
- * @license 	GPL-3.0+
+ * @license		GPL-3.0+
  *
  * LICENSE:
  * 
@@ -31,7 +31,7 @@ define(COMODOJO_DEFAULT_DB_USER, "comodojo");
 define(COMODOJO_DEFAULT_DB_PASSWORD, "");
 
 use \comodojo\Exception\DatabaseException;
-use \comodojo\debug;
+use \comodojo\dispatcher\debug;
 use \Exception;
 
 class database {

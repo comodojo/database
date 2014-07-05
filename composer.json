@@ -4,7 +4,13 @@
     "authors": [
         {
             "name": "comodojo",
-            "email": "devel@comodojo.org"
+            "email": "info@comodojo.org"
         }
-    ]
+    ],
+    "autoload": {
+        "psr-4": {
+            "comodojo\\Exception\\": "src/Exception",
+            "comodojo\\DispatcherLibrary\\": "src"
+        }
+    }
 }
