@@ -31,7 +31,7 @@ define(COMODOJO_DEFAULT_DB_USER, "comodojo");
 define(COMODOJO_DEFAULT_DB_PASSWORD, "");
 
 use \comodojo\Exception\DatabaseException;
-use \comodojo\dispatcher\debug;
+use \comodojo\Dispatcher\debug;
 use \Exception;
 
 class database {
