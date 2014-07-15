@@ -1,9 +1,20 @@
 {
     "name": "comodojo/dispatcher.library.database",
     "description": "Database connect/query library for comodojo/dispatcher.framework",
+    "license": "GPL-3.0+",
+    "type": "library",
+    "keywords": [
+        "comodojo",
+        "dispatcher",
+        "database"
+    ],
+    "homepage": "http://dispatcher.comodojo.org",
+     "support": {
+        "issues": "https://github.com/comodojo/dispatcher.library.database/issues"
+    },
     "authors": [
         {
-            "name": "comodojo",
+            "name": "Marco Giovinazzi",
             "email": "info@comodojo.org"
         }
     ],
