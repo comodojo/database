@@ -20,8 +20,8 @@
     ],
     "autoload": {
         "psr-4": {
-            "comodojo\\Exception\\": "src/Exception",
-            "comodojo\\DispatcherLibrary\\": "src"
+            "Comodojo\\Exception\\": "src/Exception",
+            "Comodojo\\Database\\": "src"
         }
     }
 }

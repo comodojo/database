@@ -1,4 +1,4 @@
-<?php namespace comodojo\Exception;
+<?php namespace Comodojo\Exception;
 
 /**
  * DatabaseException handler; nothing special, just an implementation of
@@ -25,5 +25,3 @@
  */
 
 class DatabaseException extends \Exception {}
-
-?>
