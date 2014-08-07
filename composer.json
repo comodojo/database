@@ -1,16 +1,15 @@
 {
-    "name": "comodojo/dispatcher.library.database",
-    "description": "Database connect/query library for comodojo/dispatcher.framework",
+    "name": "comodojo/database",
+    "description": "Database connect/query library for comodojo",
     "license": "GPL-3.0+",
     "type": "library",
     "keywords": [
         "comodojo",
-        "dispatcher",
         "database"
     ],
-    "homepage": "http://dispatcher.comodojo.org",
+    "homepage": "http://www.comodojo.org",
      "support": {
-        "issues": "https://github.com/comodojo/dispatcher.library.database/issues"
+        "issues": "https://github.com/comodojo/database/issues"
     },
     "authors": [
         {
