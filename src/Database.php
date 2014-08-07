@@ -1,10 +1,10 @@
 <?php namespace Comodojo\Database;
 
 /**
-* Database connect/query plugin for comodojo/dispatcher.framework  
+* Database connect/query class for comodojo
 * 
-* @package     Comodojo dispatcher (Spare Parts)
-* @author      comodojo <info@comodojo.org>
+* @package     Comodojo Spare Parts
+* @author      Marco Giovinazzi <info@comodojo.org>
 * @license     GPL-3.0+
 *
 * LICENSE:
@@ -26,30 +26,97 @@
 use \Comodojo\Exception\DatabaseException;
 use \Exception;
 
-class database {
+class Database {
 
-    private $model = null;
-
+    /**
+     * Host to connect to
+     * 
+     * @var string
+     */
     private $host = null;
 
+    /**
+     * Database port
+     * 
+     * @var int
+     */
     private $port = null;
 
+    /**
+     * Database name
+     * 
+     * @var string
+     */
     private $name = null;
 
+    /**
+     * User name
+     * 
+     * @var string
+     */
     private $user = null;
 
+    /**
+     * User password
+     * 
+     * @var string
+     */
     private $pass = null;
 
-    private $dbh = false;
-
+    /**
+     * Transaction id (if any)
+     * 
+     * @var integer
+     */
     private $id = false;
 
-    private $fetch = "ASSOC";
-
+    /**
+     * Affected rows
+     * 
+     * @var integer
+     */
     private $rows = false;
 
+    /**
+     * Fetch mode (ASSOC, NUM, BOTH)
+     * 
+     * @var string
+     */
+    private $fetch = "ASSOC";
+
+    /**
+     * Supported database data model
+     * 
+     * @var array
+     */
     private $supported_models = Array("MYSQLI","MYSQL_PDO","ORACLE_PDO","SQLITE_PDO","DBLIB_PDO","DB2","POSTGRESQL");
 
+    /**
+     * Database Handler
+     * 
+     * @var Object
+     */
+    protected $dbh = false;
+
+    /**
+     * Database data model
+     * 
+     * @var string
+     */
+    protected $model = null;
+
+    /**
+     * Constructor
+     *
+     * It validate database parameters and try to establish a connection
+     *
+     * @param   string  $model  Database data model
+     * @param   string  $host   Host to connect to
+     * @param   int     $port   Database port
+     * @param   string  $name   Database name
+     * @param   string  $user   User name
+     * @param   string  $pass   User password
+     */
     final public function __construct($model, $host, $port, $name, $user, $pass=null) {
 
         $this->model = in_array(strtoupper($model), $this->supported_models) ? strtoupper($model) : null;
@@ -88,12 +155,24 @@ class database {
 
     }
 
+    /**
+     * Destructure
+     *
+     * It's only mission is to unset (disconnect) database
+     */
     final public function __destruct() {
 
         $this->disconnect();
 
     }
 
+    /**
+     * Set fetch mode
+     *
+     * @param   string  $mode   Fetch mode (ASSOC, NUM, BOTH)
+     *
+     * @return  Object          $this
+     */
     public function fetch($mode) {
 
         if ( in_array(strtoupper($fetch), Array('ASSOC','NUM','BOTH')) ) {
@@ -107,6 +186,13 @@ class database {
 
     }
 
+    /**
+     * Set if database should return a transaction id
+     *
+     * @param   bool    $enabled
+     *
+     * @return  Object  $this
+     */
     public function id($enabled=true) {
 
         $this->id = filter_var($enabled, FILTER_VALIDATE_BOOLEAN);
@@ -115,6 +201,24 @@ class database {
 
     }
 
+    /**
+     * Shot a query to database
+     *
+     * It sends $query to database handler and build a result set. If $return_raw is
+     * set to true, method resultsToArray() will not be invoked and this will return
+     * query's result as it is. If false, result will be returned as a standard array
+     * composed by:
+     *
+     * - "data": array of fetched data
+     * - "length": result length
+     * - "id": transaction id (if any)
+     * - "affected_rows": affected rows (if any)
+     *
+     * @param   string  $query
+     * @param   bool    $return_raw
+     *
+     * @return  Object  $this
+     */
     public function query($query, $return_raw=false) {
 
         switch ($this->model) {
@@ -197,6 +301,32 @@ class database {
 
     }
 
+    /**
+     * Get transaction id (if any)
+     *
+     * @return  mixed   Integer if transaction id was populated, boolean false if not     
+     */
+    final public function getId() {
+
+        return $this->id;
+
+    }
+
+   /**
+     * Get affected rows (if any)
+     *
+     * @return  mixed   Integer if affected rows was populated, boolean false if not     
+     */
+    final public function getAffectedRows() {
+
+        return $this->rows;
+
+    }
+
+    /**
+     * Connecto to database
+     *
+     */
     private function connect() {
 
         switch ($this->model) {
@@ -205,7 +335,7 @@ class database {
                 
                 if ( !class_exists('mysqli') ) throw new DatabaseException('Unsupported database model - '.$this->model);
 
-                $this->dbh = new mysqli($this->host, $this->user, $this->pass, $this->name, $this->port);
+                $this->dbh = new \mysqli($this->host, $this->user, $this->pass, $this->name, $this->port);
 
                 if ($this->dbh->connect_error) {
 
@@ -222,7 +352,7 @@ class database {
                 $dsn="mysql:host=".$this->host.";port=".$this->port .";dbname=".$this->name;
                 
                 try {
-                    $this->dbh = new PDO($dsn,$this->user,$this->pass);
+                    $this->dbh = new \PDO($dsn,$this->user,$this->pass);
                 }
                 catch (PDOException $e) {
                     throw new DatabaseException($e->getMessage(), $e->getCode());
@@ -237,7 +367,7 @@ class database {
                 $dsn="oci:dbname=".$this->host.":".$this->port."/".$this->name;
                 
                 try {
-                    $this->dbh = new PDO($dsn,$this->user,$this->pass);
+                    $this->dbh = new \PDO($dsn,$this->user,$this->pass);
                 }
                 catch (PDOException $e) {
                     throw new DatabaseException($e->getMessage(), $e->getCode());
@@ -252,7 +382,7 @@ class database {
                 $dsn="sqlite:".$this->name;
 
                 try {
-                    $this->dbh = new PDO($dsn);
+                    $this->dbh = new \PDO($dsn);
                 }
                 catch (PDOException $e) {
                     throw new DatabaseException($e->getMessage(), $e->getCode());
@@ -280,7 +410,7 @@ class database {
                 $dsn = "dblib:host=".$this->host.":".$this->port.";dbname=".$this->name;
             
                 try {
-                    $this->dbh = new PDO($dsn,$this->user,$this->pass);
+                    $this->dbh = new \PDO($dsn,$this->user,$this->pass);
                 }
                 catch (PDOException $e) {
                     throw new DatabaseException($e->getMessage(), $e->getCode());
@@ -305,6 +435,10 @@ class database {
 
     }
 
+    /**
+     * Disconnect from database
+     *
+     */
     private function disconnect() {
 
         switch($this->model) {
@@ -333,6 +467,13 @@ class database {
 
     }
 
+    /**
+     * Transform database raw result in a standard array
+     *
+     * @param   mixed   $data   Query result as returned from database handler
+     *
+     * @return  array
+     */
     private function resultsToArray($data) {
 
         $result = Array();
@@ -379,7 +520,7 @@ class database {
                     default:        $fetch = PDO::FETCH_BOTH;   break;
                 }
 
-                $result = $sth->fetchAll($fetch);
+                $result = $this->dbh->fetchAll($fetch);
 
                                     $length = sizeof($result);
                 if ($this->id)      $id     = $this->dbh->lastInsertId();
