@@ -246,7 +246,7 @@ class Database {
                     $response->execute();
 
                 }
-                catch (PDOException $e) {
+                catch (\PDOException $e) {
 
                     $error = $dbHandler->errorInfo();
                     throw new DatabaseException($error[1], $error[2]);
@@ -347,14 +347,14 @@ class Database {
 
             case ("MYSQL_PDO"):
 
-                if ( !in_array('mysql', PDO::getAvailableDrivers()) ) throw new DatabaseException('Unsupported database model - '.$this->model);
+                if ( !in_array('mysql', \PDO::getAvailableDrivers()) ) throw new DatabaseException('Unsupported database model - '.$this->model);
 
                 $dsn="mysql:host=".$this->host.";port=".$this->port .";dbname=".$this->name;
                 
                 try {
                     $this->dbh = new \PDO($dsn,$this->user,$this->pass);
                 }
-                catch (PDOException $e) {
+                catch (\PDOException $e) {
                     throw new DatabaseException($e->getMessage(), $e->getCode());
                 }
 
@@ -362,14 +362,14 @@ class Database {
 
             case ("ORACLE_PDO"):
 
-                if ( !in_array('oci', PDO::getAvailableDrivers()) ) throw new DatabaseException('Unsupported database model - '.$this->model);
+                if ( !in_array('oci', \PDO::getAvailableDrivers()) ) throw new DatabaseException('Unsupported database model - '.$this->model);
 
                 $dsn="oci:dbname=".$this->host.":".$this->port."/".$this->name;
                 
                 try {
                     $this->dbh = new \PDO($dsn,$this->user,$this->pass);
                 }
-                catch (PDOException $e) {
+                catch (\PDOException $e) {
                     throw new DatabaseException($e->getMessage(), $e->getCode());
                 }
 
@@ -377,14 +377,14 @@ class Database {
 
             case ("SQLITE_PDO"):
             
-                if ( !in_array('sqlite', PDO::getAvailableDrivers()) ) throw new DatabaseException('Unsupported database model - '.$this->model);
+                if ( !in_array('sqlite', \PDO::getAvailableDrivers()) ) throw new DatabaseException('Unsupported database model - '.$this->model);
 
                 $dsn="sqlite:".$this->name;
 
                 try {
                     $this->dbh = new \PDO($dsn);
                 }
-                catch (PDOException $e) {
+                catch (\PDOException $e) {
                     throw new DatabaseException($e->getMessage(), $e->getCode());
                 }
 
@@ -405,14 +405,14 @@ class Database {
 
             case ("DBLIB_PDO"):
 
-                if ( !in_array('dblib', PDO::getAvailableDrivers()) ) throw new DatabaseException('Unsupported database model - '.$this->model);
+                if ( !in_array('dblib', \PDO::getAvailableDrivers()) ) throw new DatabaseException('Unsupported database model - '.$this->model);
 
                 $dsn = "dblib:host=".$this->host.":".$this->port.";dbname=".$this->name;
             
                 try {
                     $this->dbh = new \PDO($dsn,$this->user,$this->pass);
                 }
-                catch (PDOException $e) {
+                catch (\PDOException $e) {
                     throw new DatabaseException($e->getMessage(), $e->getCode());
                 }
 
@@ -515,12 +515,12 @@ class Database {
                 if ( !is_object($data) ) throw new DatabaseException('Invalid result data for model '.$this->model);
 
                 switch ($this->fetch) {
-                    case 'NUM':     $fetch = PDO::FETCH_NUM;    break;
-                    case 'ASSOC':   $fetch = PDO::FETCH_ASSOC;  break;
-                    default:        $fetch = PDO::FETCH_BOTH;   break;
+                    case 'NUM':     $fetch = \PDO::FETCH_NUM;    break;
+                    case 'ASSOC':   $fetch = \PDO::FETCH_ASSOC;  break;
+                    default:        $fetch = \PDO::FETCH_BOTH;   break;
                 }
 
-                $result = $this->dbh->fetchAll($fetch);
+                $result = $data->fetchAll($fetch);
 
                                     $length = sizeof($result);
                 if ($this->id)      $id     = $this->dbh->lastInsertId();
