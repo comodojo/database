@@ -1,6 +1,6 @@
 {
     "name": "comodojo/database",
-    "description": "Database connect/query library for comodojo",
+    "description": "Multi-database library for comodojo",
     "license": "GPL-3.0+",
     "type": "library",
     "keywords": [
@@ -22,7 +22,7 @@
     "autoload": {
         "psr-4": {
             "Comodojo\\Exception\\": "src/Exception",
-            "Comodojo\\Database\\QueryBuilder": "src/QueryBuilder",
+            "Comodojo\\Database\\QueryBuilder\\": "src/QueryBuilder",
             "Comodojo\\Database\\": "src"
         }
     }
