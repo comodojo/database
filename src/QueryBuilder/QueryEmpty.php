@@ -1,9 +1,11 @@
-<?php namespace Comodojo\Exception;
+<?php namespace Comodojo\Database\QueryBuilder;
+
+use \Comodojo\Exception\DatabaseException;
+use \Exception;
 
 /**
- * DatabaseException handler; nothing special, just an implementation of
- * standard Exception class.
- *
+ * EMPTY query builder
+ * 
  * @package     Comodojo Spare Parts
  * @author      Marco Giovinazzi <info@comodojo.org>
  * @license     GPL-3.0+
@@ -24,4 +26,34 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-class DatabaseException extends \Exception {}
+class QueryEmpty {
+
+    private $model = null;
+
+    private $table = null;
+
+    public function __construct($model) {
+
+        $this->model = $model;
+
+    }
+
+    final public function table($data) {
+
+        $this->table = $data;
+
+        return $this;
+
+    }
+
+    public function getQuery() {
+        
+        if ( is_null($this->table) ) throw new DatabaseException('Invalid parameters for database->empty',1016);
+
+        $query_pattern = "DELETE FROM %s WHERE TRUE";
+        
+        return sprintf($query_pattern, $this->table);
+
+    }
+
+}

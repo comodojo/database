@@ -5,7 +5,9 @@
     "type": "library",
     "keywords": [
         "comodojo",
-        "database"
+        "database",
+        "query",
+        "builder"
     ],
     "homepage": "http://www.comodojo.org",
      "support": {
@@ -20,6 +22,7 @@
     "autoload": {
         "psr-4": {
             "Comodojo\\Exception\\": "src/Exception",
+            "Comodojo\\Database\\QueryBuilder": "src/QueryBuilder",
             "Comodojo\\Database\\": "src"
         }
     }
