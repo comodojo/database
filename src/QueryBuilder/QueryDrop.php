@@ -4,7 +4,7 @@ use \Comodojo\Exception\DatabaseException;
 use \Exception;
 
 /**
- * Column definitions
+ * DROP query builder
  * 
  * @package     Comodojo Spare Parts
  * @author      Marco Giovinazzi <info@comodojo.org>
@@ -26,13 +26,19 @@ use \Exception;
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-class QueryGet {
+class QueryDrop {
   
     private $model = null;
 
     private $if_exists = null;
 
     private $table = null;
+
+    public function __construct($model) {
+
+        $this->model = $model;
+
+    }
 
     final public function ifExists($data) {
     
@@ -44,7 +50,7 @@ class QueryGet {
     
     final public function table($data) {
     
-        $this->table = $data:
+        $this->table = $data;
     
         return $this;
     

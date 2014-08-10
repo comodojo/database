@@ -133,27 +133,39 @@ class EnhancedDatabase extends Database {
      *
      * @var string
      */
-    private $columns = null;
+    private $columns = array();
 
-    static private $supported_query_type = array('GET','STORE','UPDATE','DELETE','EMPTY','CREATE','DROP'/*,'ALTER'*/);
+    private $auto_clean = false;
+
+    static private $supported_query_types = array('GET','STORE','UPDATE','DELETE','EMPTY','CREATE','DROP'/*,'ALTER'*/);
 
     /**
-     * Current query, as composed by $this->buildQuery()
+     * If $mode == true, builder will reset itself after each build
      *
-     * @var string
+     * @param   bool    $mode
+     *
+     * @return  Object  $this
      */
-    private $query = null;
+    final public function autoClean($mode=true) {
+
+        $this->auto_clean = filter_var($mode, FILTER_VALIDATE_BOOLEAN);
+
+        return $this;
+
+    }
 
     /**
      * Return the current query as a string
      *
      * @return  string
      */
-    final public function getQuery($query) {
+    final public function getQuery($query, $parameters=array()) {
 
         try {
             
-            $this->buildQuery($query);
+            $query = $this->buildQuery($query, $parameters);
+
+            $query = str_replace("*_DBPREFIX_*", $this->table_prefix, $query);
 
         } catch (DatabaseException $de) {
             
@@ -161,7 +173,7 @@ class EnhancedDatabase extends Database {
 
         }
 
-        return $this->query;
+        return $query;
 
     }
 
@@ -172,7 +184,7 @@ class EnhancedDatabase extends Database {
      *
      * @return  Object  $this
      */
-    final public function table(string $table) {
+    final public function table($table) {
 
         $table_pattern = in_array($this->model, Array('MYSQLI','MYSQL_PDO')) ? "`*_DBPREFIX_*%s`" : "*_DBPREFIX_*%s";
 
@@ -184,9 +196,9 @@ class EnhancedDatabase extends Database {
 
     }
 
-    final public function tablePrefix(string $prefix) {
+    final public function tablePrefix($prefix) {
 
-        $this->table_prefix = $prefix;
+        $this->table_prefix = empty($prefix) ? null : $prefix;
 
         return $this;
 
@@ -199,9 +211,9 @@ class EnhancedDatabase extends Database {
      *
      * @return  Object  $this
      */
-    final public function distinct(bool $value) {
+    final public function distinct(/*$value*/) {
 
-        $this->distinct = filter_var($value, FILTER_VALIDATE_BOOLEAN);
+        $this->distinct = true; /*filter_var($value, FILTER_VALIDATE_BOOLEAN);*/
 
         return $this;
 
@@ -401,19 +413,31 @@ class EnhancedDatabase extends Database {
      *
      * @return  Object  $this
      */
-    public function join(string $join_type, string $table) {
+    public function join($join_type, $table, $as=null) {
         
         $join = strtoupper($join_type);
 
-        $join_pattern = "%sJOIN %s";
-
-        $join_type_list = Array('INNER','NATURAL','CROSS','LEFT','RIGHT','LEFT OUTER','RIGHT OUTER','FULL OUTER');
+        $join_type_list = Array('INNER','NATURAL','CROSS','LEFT','RIGHT','LEFT OUTER','RIGHT OUTER','FULL OUTER',null);
 
         if ( !in_array($join, $join_type_list) OR empty($table) ) throw new DatabaseException('Invalid parameters for database join',1019);
 
-        if ( is_null($this->join) ) $this->join = sprintf($join_pattern, $join." ",$table);
+        if ( is_null($as) ) {
 
-        else $this->join .= " ".sprintf($join_pattern, $join." ",$table);
+            $join_pattern = " %sJOIN %s";
+
+            if ( is_null($this->join) ) $this->join = sprintf($join_pattern, $join." ", $table);
+
+            else $this->join .= " ".sprintf($join_pattern, $join." ", $table);
+
+        } else {
+
+            $join_pattern = " %sJOIN %s AS %s";
+
+            if ( is_null($this->join) ) $this->join = sprintf($join_pattern, $join." ", $table, $as);
+
+            else $this->join .= " ".sprintf($join_pattern, $join." ", $table, $as);
+
+        }
         
         return $this;
 
@@ -449,7 +473,7 @@ class EnhancedDatabase extends Database {
      *
      * @return  Object  $this
      */
-    public function on(string $first_column, string $operator, string $second_column) {
+    public function on($first_column, $operator, $second_column) {
 
         try {
 
@@ -475,7 +499,7 @@ class EnhancedDatabase extends Database {
      *
      * @return  Object  $this
      */
-    public function andOn(string $first_column, string $operator, string $second_column) {
+    public function andOn($first_column, $operator, $second_column) {
 
         try {
 
@@ -501,7 +525,7 @@ class EnhancedDatabase extends Database {
      *
      * @return  Object  $this
      */
-    public function orOn(string $first_column, string $operator, string $second_column) {
+    public function orOn($first_column, $operator, $second_column) {
 
         try {
 
@@ -753,8 +777,10 @@ class EnhancedDatabase extends Database {
 
     }
 
-    public function create(string $name, $if_not_exists=false, $engine=false, $return_raw=false) {
+    public function create($name, $if_not_exists=false, $engine=false, $return_raw=false) {
 
+        if ( empty($name) ) throw new DatabaseException("Invalid or empty table name");
+        
         try {
             
             $query = $this->buildQuery('CREATE', array(
@@ -812,7 +838,7 @@ class EnhancedDatabase extends Database {
      *
      * @return array
      */
-    public function clean(bool $deep=null) {
+    public function clean($deep=false) {
         
         $this->table = null;
 
@@ -840,9 +866,9 @@ class EnhancedDatabase extends Database {
 
         $this->having = null;
 
-        $this->query = null;
-
         if ( filter_var($deep, FILTER_VALIDATE_BOOLEAN) ) {
+
+            $this->table_prefix = null;
 
             parent::clean();
 
@@ -937,7 +963,9 @@ class EnhancedDatabase extends Database {
         if ( $operation_array_size == 1 ) {
 
             //no operation, keep key definition
-            $operation = null;
+            $value = $operation_array[0];
+
+            $key = $value == '*' ? $value : sprintf($key_pattern, $value);
 
         } else {
 
@@ -1099,7 +1127,43 @@ class EnhancedDatabase extends Database {
 
                     $clause_pattern = in_array($this->model, Array('MYSQLI','MYSQL_PDO')) ? "`%s` IN (%s)" : "%s IN (%s)";
 
-                    $processed_value = "'".implode("','", $value)."'";
+                    array_walk($value, function(&$keyvalue, $key) {
+
+                        if  ( is_bool($keyvalue) === true ) {
+
+                            switch ($this->model) {
+
+                                case 'MYSQLI':
+                                case 'MYSQL_PDO':
+                                case 'POSTGRESQL':
+                                case 'DB2':
+
+                                    $keyvalue = $keyvalue ? 'TRUE' : 'FALSE';
+
+                                    break;
+
+                                case 'DBLIB_PDO':
+                                case 'ORACLE_PDO':
+                                case 'SQLITE_PDO':
+                                default:
+
+                                    $keyvalue = $keyvalue ? 1 : 0;
+
+                                    break;
+
+                            }
+
+                        }
+
+                        elseif ( is_numeric($keyvalue) ) $keyvalue = $keyvalue;
+
+                        elseif ( is_null($keyvalue) ) $keyvalue = "NULL";
+
+                        else $keyvalue = "'".$keyvalue."'";
+
+                    });
+
+                    $processed_value = implode(",", $value);
 
                     $to_return = sprintf($clause_pattern, $column, $processed_value);
 
@@ -1109,7 +1173,7 @@ class EnhancedDatabase extends Database {
 
                     $clause_pattern = in_array($this->model, Array('MYSQLI','MYSQL_PDO')) ? "`%s` BETWEEN %s AND %s" : "%s BETWEEN %s AND %s";
 
-                    $to_return = sprintf($clause_pattern, $value[0], $value[1]);
+                    $to_return = sprintf($clause_pattern, $column, intval($value[0]), intval($value[1]));
 
                     break;
 
@@ -1129,7 +1193,7 @@ class EnhancedDatabase extends Database {
 
                     $clause_pattern = in_array($this->model, Array('MYSQLI','MYSQL_PDO')) ? "`%s` NOT BETWEEN %s AND %s" : "%s NOT BETWEEN %s AND %s";
 
-                    $to_return = sprintf($clause_pattern, $value[0], $value[1]);
+                    $to_return = sprintf($clause_pattern, $column, intval($value[0]), intval($value[1]));
 
                     break;
 
@@ -1230,7 +1294,7 @@ class EnhancedDatabase extends Database {
 
         $query = strtoupper($query);
 
-        if ( !in_array($query, $this->supported_queries) ) throw new DatabaseException('Unsupported query type for buidler');
+        if ( !in_array($query, self::$supported_query_types) ) throw new DatabaseException('Unsupported query type for buidler');
         
         try {
         
@@ -1343,6 +1407,8 @@ class EnhancedDatabase extends Database {
             throw $de;
 
         }
+
+        if ( $this->auto_clean ) $this->clean();
 
         return $composed_query;
 

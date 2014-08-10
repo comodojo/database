@@ -153,7 +153,7 @@ class Column {
      * @param   string  $name   User name
      * @param   string  $type   User password
      */
-    final public function __construct(string $name, string $type) {
+    final public function __construct($name, $type) {
 
         if ( empty($name) ) throw new DatabaseException("Invalid column's name");
 
@@ -165,9 +165,9 @@ class Column {
 
     }
 
-    final public function length(int $length) {
+    final public function length($length) {
 
-        $this->length = $length;
+        $this->length = filter_var($length, FILTER_VALIDATE_INT);
 
         return $this;
 
@@ -189,9 +189,9 @@ class Column {
 
     }
 
-    final public function charset(string $charset) {
+    final public function charset($charset) {
 
-        $this->charset = $charset;
+        $this->charset = empty($charset) ? null : $charset;
 
         return $this;
 
@@ -251,13 +251,13 @@ class Column {
 
     }
 
-    final public function getColumnType(string $type, string $model) {
+    final public function getColumnType($type, $model) {
 
         return self::$supported_column_conversions[$model][$type];
 
     }
 
-    final public function getColumnDefinition(string $model) {
+    final public function getColumnDefinition($model) {
 
         switch ($model) {
 
@@ -329,7 +329,7 @@ class Column {
 
         $primaryKey = is_null($this->primaryKey) ? null : ' PRIMARY KEY';
 
-        return sprintf($self::$column_patterns['MYSQL'],
+        return sprintf(self::$column_patterns['MYSQL'],
             $this->name,
             self::$supported_column_conversions['MYSQL'][$this->type],
             $length,
@@ -362,7 +362,7 @@ class Column {
 
         $primaryKey = is_null($this->primaryKey) ? null : ' PRIMARY KEY';
 
-        return sprintf($self::$column_patterns['POSTGRESQL'],
+        return sprintf(self::$column_patterns['POSTGRESQL'],
             $this->name,
             self::$supported_column_conversions['POSTGRESQL'][$this->type],
             $length,
@@ -395,7 +395,7 @@ class Column {
 
         $primaryKey = is_null($this->primaryKey) ? null : ' PRIMARY KEY';
 
-        return sprintf($self::$column_patterns['ORACLE'],
+        return sprintf(self::$column_patterns['ORACLE'],
             $this->name,
             self::$supported_column_conversions['ORACLE'][$this->type],
             $length,
@@ -428,7 +428,7 @@ class Column {
 
         $primaryKey = is_null($this->primaryKey) ? null : ' PRIMARY KEY';
 
-        return sprintf($self::$column_patterns['DB2'],
+        return sprintf(self::$column_patterns['DB2'],
             $this->name,
             self::$supported_column_conversions['DB2'][$this->type],
             $length,
@@ -461,7 +461,7 @@ class Column {
 
         $primaryKey = is_null($this->primaryKey) ? null : ' PRIMARY KEY';
 
-        return sprintf($self::$column_patterns['DBLIB'],
+        return sprintf(self::$column_patterns['DBLIB'],
             $this->name,
             self::$supported_column_conversions['DBLIB'][$this->type],
             $length,
@@ -488,7 +488,7 @@ class Column {
 
         $primaryKey = is_null($this->primaryKey) ? null : ' PRIMARY KEY';
 
-        return sprintf($self::$column_patterns['SQLITE'],
+        return sprintf(self::$column_patterns['SQLITE'],
             $this->name,
             self::$supported_column_conversions['SQLITE'][$this->type],
             $attr_1,

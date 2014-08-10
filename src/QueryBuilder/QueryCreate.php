@@ -38,6 +38,12 @@ class QueryCreate {
 
     private $columns = array();
 
+    public function __construct($model) {
+
+        $this->model = $model;
+
+    }
+
     final public function ifNotExists($data) {
     
         $this->if_not_exists = $data;
@@ -89,7 +95,7 @@ class QueryCreate {
 
                 $query_pattern = "CREATE TABLE%s %s (%s)%s";
 
-                $query = sprintf($query_pattern, $if_not_exists, $table, implode(',',$this->columns), $engine);
+                $query = sprintf($query_pattern, $if_not_exists, $table, implode(', ',$this->columns), $engine);
 
                 break;
 
@@ -106,13 +112,13 @@ class QueryCreate {
 
                 $query_pattern = "CREATE TABLE%s %s (%s)";
 
-                $query = sprintf($query_pattern, $if_not_exists, $table, implode(',',$this->columns));
+                $query = sprintf($query_pattern, $if_not_exists, $table, implode(', ',$this->columns));
 
                 break;
         
         }
 
-        return $this->query;
+        return $query;
 
     }
 
