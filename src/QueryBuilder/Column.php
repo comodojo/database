@@ -478,15 +478,15 @@ class Column {
     
     private function sqliteColumnDefinition() {
 
-        $attr_1 = is_null($this->unsigned) ? (is_null($this->collate) ? null : " COLLATE ".$this->collate) : ' UNSIGNED';
+        $primaryKey = is_null($this->primaryKey) ? null : ' PRIMARY KEY';
+
+        $attr_1 = is_null($this->unsigned) ? (is_null($this->collate) ? null : " COLLATE ".$this->collate) : (is_null($primaryKey) ? ' UNSIGNED' : null);
 
         $notNull = is_null($this->notNull) ? null : ' NOT NULL';
 
         $defaultValue = is_null($this->defaultValue) ? null : ' DEFAULT '.$this->defaultValue;
 
         $unique = is_null($this->unique) ? null : ' UNIQUE';
-
-        $primaryKey = is_null($this->primaryKey) ? null : ' PRIMARY KEY';
 
         return sprintf(self::$column_patterns['SQLITE'],
             $this->name,

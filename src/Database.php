@@ -68,14 +68,21 @@ class Database {
      * 
      * @var integer
      */
-    private $id = false;
+    private $id = null;
 
     /**
      * Affected rows
      * 
      * @var integer
      */
-    private $rows = false;
+    private $rows = null;
+
+    /**
+     * Result length
+     * 
+     * @var integer
+     */
+    private $length = null;
 
     /**
      * Fetch mode (ASSOC, NUM, BOTH)
@@ -187,21 +194,6 @@ class Database {
     }
 
     /**
-     * Set if database should return a transaction id
-     *
-     * @param   bool    $enabled
-     *
-     * @return  Object  $this
-     */
-    public function id($enabled=true) {
-
-        $this->id = filter_var($enabled, FILTER_VALIDATE_BOOLEAN);
-
-        return $this;
-
-    }
-
-    /**
      * Shot a query to database
      *
      * It sends $query to database handler and build a result set. If $return_raw is
@@ -248,8 +240,7 @@ class Database {
                 }
                 catch (\PDOException $e) {
 
-                    $error = $dbHandler->errorInfo();
-                    throw new DatabaseException($error[1], $error[2]);
+                    throw new DatabaseException($e->getMessage(), (int)$e->getCode());
 
                 }
 
@@ -324,7 +315,7 @@ class Database {
     /**
      * Get transaction id (if any)
      *
-     * @return  mixed   Integer if transaction id was populated, boolean false if not     
+     * @return  mixed   Integer if transaction id was populated, null if not     
      */
     final public function getId() {
 
@@ -332,14 +323,25 @@ class Database {
 
     }
 
-   /**
+    /**
      * Get affected rows (if any)
      *
-     * @return  mixed   Integer if affected rows was populated, boolean false if not     
+     * @return  mixed   Integer if affected rows was populated, null if not     
      */
     final public function getAffectedRows() {
 
         return $this->rows;
+
+    }
+
+    /**
+     * Get result length
+     *
+     * @return  mixed   Integer if affected rows was populated, null if not     
+     */
+    final public function getResultLength() {
+
+        return $this->length;
 
     }
 
@@ -372,7 +374,9 @@ class Database {
                 $dsn="mysql:host=".$this->host.";port=".$this->port .";dbname=".$this->name;
                 
                 try {
-                    $this->dbh = new \PDO($dsn,$this->user,$this->pass);
+
+                    $this->dbh = new \PDO($dsn, $this->user, $this->pass, array(\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION));
+
                 }
                 catch (\PDOException $e) {
                     throw new DatabaseException($e->getMessage(), $e->getCode());
@@ -387,7 +391,7 @@ class Database {
                 $dsn="oci:dbname=".$this->host.":".$this->port."/".$this->name;
                 
                 try {
-                    $this->dbh = new \PDO($dsn,$this->user,$this->pass);
+                    $this->dbh = new \PDO($dsn, $this->user, $this->pass, array(\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION));
                 }
                 catch (\PDOException $e) {
                     throw new DatabaseException($e->getMessage(), $e->getCode());
@@ -402,7 +406,7 @@ class Database {
                 $dsn="sqlite:".$this->name;
 
                 try {
-                    $this->dbh = new \PDO($dsn);
+                    $this->dbh = new \PDO($dsn, $this->user, $this->pass, array(\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION));
                 }
                 catch (\PDOException $e) {
                     throw new DatabaseException($e->getMessage(), $e->getCode());
@@ -430,7 +434,7 @@ class Database {
                 $dsn = "dblib:host=".$this->host.":".$this->port.";dbname=".$this->name;
             
                 try {
-                    $this->dbh = new \PDO($dsn,$this->user,$this->pass);
+                    $this->dbh = new \PDO($dsn, $this->user, $this->pass, array(\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION));
                 }
                 catch (\PDOException $e) {
                     throw new DatabaseException($e->getMessage(), $e->getCode());
@@ -515,9 +519,9 @@ class Database {
                     default:        $fetch = MYSQLI_BOTH;   break;
                 }
                 
-                                    $length = $data->num_rows;
-                if ($this->id)      $id     = $this->dbh->insert_id;
-                if ($this->rows)    $rows   = $this->dbh->affected_rows;
+                $this->length = $data->num_rows;
+                $this->id     = $this->dbh->insert_id;
+                $this->rows   = $this->dbh->affected_rows;
 
                 while($iterator < $length) {
                     $result[$iterator] = $data->fetch_array($fetch);
@@ -542,9 +546,9 @@ class Database {
 
                 $result = $data->fetchAll($fetch);
 
-                                    $length = sizeof($result);
-                if ($this->id)      $id     = $this->dbh->lastInsertId();
-                if ($this->rows)    $rows   = $data->rowCount();
+                $this->length = sizeof($result);
+                $this->id     = $this->dbh->lastInsertId();
+                $this->rows   = $data->rowCount();
 
                 break;
 
@@ -552,9 +556,9 @@ class Database {
 
                 if ( !is_resource($data) OR @get_resource_type($data) != "DB2 Statement" ) throw new DatabaseException('Invalid result data for model '.$this->model);
 
-                                    $length = db2_num_fields($data);
-                if ($this->id)      $id     = db2_last_insert_id($this->dbh);
-                if ($this->rows)    $rows   = db2_num_rows($data);
+                $this->length = db2_num_fields($data);
+                $this->id     = db2_last_insert_id($this->dbh);
+                $this->rows   = db2_num_rows($data);
 
                 switch ($this->fetch) {
                     case 'NUM':     while ($row = db2_fetch_row($data)) array_push($result, $row);      break;
@@ -568,9 +572,9 @@ class Database {
 
                 if ( !is_resource($data) OR @get_resource_type($data) != "pgsql result" ) throw new DatabaseException('Invalid result data for model '.$this->model);
                 
-                                    $length = pg_num_rows($data);
-                if ($this->id)      $id     = pg_last_oid($data);
-                if ($this->rows)    $rows   = pg_affected_rows($data);
+                $this->length = pg_num_rows($data);
+                $this->id     = pg_last_oid($data);
+                $this->rows   = pg_affected_rows($data);
 
                 while($iterator < $length) {
                     switch ($this->fetch) {
@@ -587,9 +591,9 @@ class Database {
 
         return Array(
             "data"          =>  $result,
-            "length"        =>  $length,
-            "id"            =>  $id,
-            "affected_rows" =>  $rows
+            "length"        =>  $this->length,
+            "id"            =>  $this->id,
+            "affected_rows" =>  $this->rows
         );
 
     }

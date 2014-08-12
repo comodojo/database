@@ -26,7 +26,7 @@ use \Exception;
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-class QueryEmpty {
+class QueryTruncate {
 
     private $model = null;
 
@@ -50,9 +50,40 @@ class QueryEmpty {
         
         if ( is_null($this->table) ) throw new DatabaseException('Invalid parameters for database->empty',1016);
 
-        $query_pattern = "DELETE FROM %s WHERE TRUE";
-        
-        return sprintf($query_pattern, $this->table);
+        switch ($this->model) {
+
+            case ("MYSQLI"):
+            case ("MYSQL_PDO"):
+            case ("ORACLE_PDO"):
+            case ("DBLIB_PDO"):
+
+                $query_pattern = "TRUNCATE TABLE %s";
+
+                break;
+
+            case ("POSTGRESQL"):
+
+                $query_pattern = "TRUNCATE %s RESTART IDENTITY";
+
+                break;
+
+            case ("DB2"):
+
+                $query_pattern = "TRUNCATE TABLE %s IGNORE DELETE TRIGGERS DROP STORAGE IMMEDIATE";
+
+                break;
+            
+            case ("SQLITE_PDO"):
+
+                $query_pattern = "DELETE FROM %s; DELETE FROM SQLITE_SEQUENCE WHERE name='%s'";
+
+                break;
+
+        }
+
+        if ( $this->model == "SQLITE_PDO" ) return sprintf($query_pattern, $this->table, $this->table);
+
+        else return sprintf($query_pattern, $this->table);
 
     }
 

@@ -137,7 +137,7 @@ class EnhancedDatabase extends Database {
 
     private $auto_clean = false;
 
-    static private $supported_query_types = array('GET','STORE','UPDATE','DELETE','EMPTY','CREATE','DROP'/*,'ALTER'*/);
+    static private $supported_query_types = array('GET','STORE','UPDATE','DELETE','TRUNCATE','CREATE','DROP'/*,'ALTER'*/);
 
     /**
      * If $mode == true, builder will reset itself after each build
@@ -254,7 +254,7 @@ class EnhancedDatabase extends Database {
 
             else if ( is_array($keys) ) foreach ($keys as $key) array_push($processed_keys, $this->composeKey($key));
 
-            else array_push($processed_keys, $this->composeKey($key));
+            else array_push($processed_keys, $this->composeKey($keys));
 
 
         } catch (DatabaseException $de) {
@@ -288,11 +288,11 @@ class EnhancedDatabase extends Database {
 
         try {
             
-            if ( empty($values) ) throw new DatabaseException('Invalid value/s',1014);
+            //if ( empty($values) ) throw new DatabaseException('Invalid value/s',1014);
 
-            else if ( is_array($values) ) foreach ($values as $value) array_push($processed_values, $this->composeValue($value));
+            if ( is_array($values) ) foreach ($values as $value) array_push($processed_values, $this->composeValue($value));
 
-            else array_push($processed_values, $this->composeValue($value));
+            else array_push($processed_values, $this->composeValue($values));
 
 
         } catch (DatabaseException $de) {
@@ -759,11 +759,11 @@ class EnhancedDatabase extends Database {
 
     }
 
-    public function emtpy($return_raw=false) {
+    public function truncate($return_raw=false) {
 
         try {
             
-            $query = $this->buildQuery('EMPTY');
+            $query = $this->buildQuery('TRUNCATE');
 
             $result = $this->query($query, $return_raw);
 
@@ -865,6 +865,8 @@ class EnhancedDatabase extends Database {
         $this->group_by = null;
 
         $this->having = null;
+
+        $this->columns = array();
 
         if ( filter_var($deep, FILTER_VALIDATE_BOOLEAN) ) {
 
@@ -994,13 +996,13 @@ class EnhancedDatabase extends Database {
      *
      * @return  string
      */
-    private function composeValues($value) {
+    private function composeValue($value) {
 
-        if ( empty($value) ) throw new DatabaseException('Invalid value',1014);
+        //if ( empty($value) ) throw new DatabaseException('Invalid value',1014);
 
         $value_string_pattern = "'%s'";
 
-        $value_null_pattern = 'NULL';
+        $value_null_pattern = 'null';
 
         $processed_value = null;
 
@@ -1359,9 +1361,9 @@ class EnhancedDatabase extends Database {
 
                     break;
 
-                case 'EMPTY':
+                case 'TRUNCATE':
                     
-                    $builder = new \Comodojo\Database\QueryBuilder\QueryEmpty($this->model);
+                    $builder = new \Comodojo\Database\QueryBuilder\QueryTruncate($this->model);
 
                     $builder->table($this->table);
 
