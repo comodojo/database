@@ -523,7 +523,7 @@ class Database {
                 $this->id     = $this->dbh->insert_id;
                 $this->rows   = $this->dbh->affected_rows;
 
-                while($iterator < $length) {
+                while($iterator < $this->length) {
                     $result[$iterator] = $data->fetch_array($fetch);
                     $iterator++;
                 }
@@ -576,7 +576,7 @@ class Database {
                 $this->id     = pg_last_oid($data);
                 $this->rows   = pg_affected_rows($data);
 
-                while($iterator < $length) {
+                while($iterator < $this->length) {
                     switch ($this->fetch) {
                         case 'NUM':     $result[$iterator] = pg_fetch_array($data); break;
                         case 'ASSOC':   $result[$iterator] = pg_fetch_assoc($data); break;
