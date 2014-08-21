@@ -120,21 +120,21 @@ class QueryStore {
                 
                 case ("SQLITE_PDO"):
 
-                    $query_pattern = "INSERT INTO %s%s SELECT %s";
+                    $query_pattern = "INSERT INTO %s SELECT %s UNION SELECT %s";
 
-                    $keys = ( $this->keys == "*" OR is_null($this->keys) ) ? null : "(".$this->keys.")";
+                    if ( $this->keys == "*" OR is_null($this->keys) ) throw new DatabaseException('SQLite require expllicit keys definition in multiple insert statement');
 
-                    array_walk($this->values_array, function(&$value, $key) {
+                    $select = array();
 
-                        $value = "(".$value.")";
+                    foreach ($this->keys_array as $position => $key) array_push($select, $this->values_array[0][$position]." AS ".$key);
 
-                    });
+                    $union_select = array();
 
-                    $values = implode(' UNION SELECT ', $this->values_array);
+                    foreach (array_slice($this->values_array, 1) as $values) array_push($union_select, implode(", ",$values));
 
-                    $query = sprintf($query_pattern, $this->table, " ".$keys, $values);
+                    $query = sprintf($query_pattern, $this->table, implode(", ",$select), implode(" UNION SELECT ",$union_select));
 
-                break;
+                    break;
                     
                 case ("ORACLE_PDO"):
 
@@ -152,13 +152,13 @@ class QueryStore {
 
                     $query = sprintf($query_pattern, $this->table, " ".$keys, $values);
 
-                break;
+                    break;
 
             }
 
         }
 
-    return $query;
+        return $query;
 
     }
 
