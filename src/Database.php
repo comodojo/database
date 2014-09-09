@@ -305,8 +305,6 @@ class Database {
     public function clean() {
 
         $this->fetch = 'ASSOC';
-        
-        $this->id = false;
 
         return $this;
 
@@ -534,8 +532,7 @@ class Database {
             case ("MYSQL_PDO"):
             case ("ORACLE_PDO"):
             case ("SQLITE_PDO"):
-            case ("DBLIB_PDO"):
-
+            
                 if ( !is_object($data) ) throw new DatabaseException('Invalid result data for model '.$this->model);
 
                 switch ($this->fetch) {
@@ -549,6 +546,33 @@ class Database {
                 $this->length = sizeof($result);
                 $this->id     = $this->dbh->lastInsertId();
                 $this->rows   = $data->rowCount();
+
+                break;
+                
+            case ("DBLIB_PDO"):
+
+                if ( !is_object($data) ) throw new DatabaseException('Invalid result data for model '.$this->model);
+
+                switch ($this->fetch) {
+                    case 'NUM':     $fetch = \PDO::FETCH_NUM;    break;
+                    case 'ASSOC':   $fetch = \PDO::FETCH_ASSOC;  break;
+                    default:        $fetch = \PDO::FETCH_BOTH;   break;
+                }
+
+                $result = $data->fetchAll($fetch);
+
+                $this->length = sizeof($result);
+                $this->rows   = $data->rowCount();
+
+                try {
+                    
+                    $this->id = $this->dblibLastInsertId();
+
+                } catch (DatabaseException $de) {
+                    
+                    throw $de;
+
+                }
 
                 break;
 
@@ -595,6 +619,33 @@ class Database {
             "id"            =>  $this->id,
             "affected_rows" =>  $this->rows
         );
+
+    }
+    
+    /**
+     * Trik to enable last insert id (scope-relative) for dblib PDO, since
+     * lastInsertId() is not supported by driver
+     *
+     * @return  mixed
+     */
+    private function dblibLastInsertId() {
+
+        $query = "SELECT SCOPE_IDENTITY() as id";
+
+        try {
+
+            $response = $this->dbh->prepare($query);
+            $response->execute();
+            $id = $response->fetchAll(\PDO::FETCH_ASSOC);
+
+        }
+        catch (\PDOException $e) {
+
+            throw new DatabaseException($e->getMessage(), (int)$e->getCode());
+
+        }
+
+        return is_null($id[0]['id']) ? null : intval($id[0]['id']);
 
     }
 
