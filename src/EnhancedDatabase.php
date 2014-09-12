@@ -777,7 +777,7 @@ class EnhancedDatabase extends Database {
 
     }
 
-    public function create($name, $if_not_exists=false, $engine=false, $return_raw=false) {
+    public function create($name, $if_not_exists=false, $engine=null, $return_raw=false) {
 
         if ( empty($name) ) throw new DatabaseException("Invalid or empty table name");
         
