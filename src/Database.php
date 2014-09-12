@@ -509,7 +509,7 @@ class Database {
 
             case ("MYSQLI"):
                 
-                if ( !is_object($data) OR !is_a($data, 'mysqli_result') ) throw new DatabaseException('Invalid result data for model '.$this->model);
+                if ( ( !is_object($data) OR !is_a($data, 'mysqli_result') ) AND $data != TRUE ) throw new DatabaseException('Invalid result data for model '.$this->model);
 
                 switch ($this->fetch) {
                     case 'NUM':     $fetch = MYSQLI_NUM;    break;
@@ -525,14 +525,40 @@ class Database {
                     $result[$iterator] = $data->fetch_array($fetch);
                     $iterator++;
                 }
-                $data->free();
+
+                if ($data != TRUE) $data->free();
 
                 break;
 
             case ("MYSQL_PDO"):
-            case ("ORACLE_PDO"):
             case ("SQLITE_PDO"):
             
+                if ( !is_object($data) ) throw new DatabaseException('Invalid result data for model '.$this->model);
+
+                switch ($this->fetch) {
+                    case 'NUM':     $fetch = \PDO::FETCH_NUM;    break;
+                    case 'ASSOC':   $fetch = \PDO::FETCH_ASSOC;  break;
+                    default:        $fetch = \PDO::FETCH_BOTH;   break;
+                }
+
+                try {
+                    
+                    $result = $data->fetchAll($fetch);
+
+                } catch (\PDOException $pe) {
+                    
+                    $result = true;
+
+                }
+
+                $this->length = sizeof($result);
+                $this->id     = $this->dbh->lastInsertId();
+                $this->rows   = $data->rowCount();
+
+                break;
+            
+            case ("ORACLE_PDO"):
+        
                 if ( !is_object($data) ) throw new DatabaseException('Invalid result data for model '.$this->model);
 
                 switch ($this->fetch) {
@@ -544,8 +570,17 @@ class Database {
                 $result = $data->fetchAll($fetch);
 
                 $this->length = sizeof($result);
-                $this->id     = $this->dbh->lastInsertId();
                 $this->rows   = $data->rowCount();
+
+                try {
+                    
+                    $this->id = $this->oracleLastInsertId();
+
+                } catch (DatabaseException $de) {
+                    
+                    throw $de;
+
+                }
 
                 break;
                 
@@ -642,6 +677,35 @@ class Database {
         catch (\PDOException $e) {
 
             throw new DatabaseException($e->getMessage(), (int)$e->getCode());
+
+        }
+
+        return is_null($id[0]['id']) ? null : intval($id[0]['id']);
+
+    }
+    
+    /**
+     * Trik to enable last insert id (session-relative) for ORACLE_PDO, since
+     * lastInsertId() is not supported by driver
+     *
+     * @return  mixed
+     */
+    private function oracleLastInsertId() {
+
+        $query = "SELECT id.currval as id from dual";
+
+        try {
+
+            $response = $this->dbh->prepare($query);
+            $response->execute();
+            $id = $response->fetchAll(\PDO::FETCH_ASSOC);
+
+        }
+        catch (\PDOException $e) {
+
+            //throw new DatabaseException($e->getMessage(), (int)$e->getCode());
+
+            return null;
 
         }
 
