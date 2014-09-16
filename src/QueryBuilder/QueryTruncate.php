@@ -4,7 +4,7 @@ use \Comodojo\Exception\DatabaseException;
 use \Exception;
 
 /**
- * EMPTY query builder
+ * TRUNCATE query builder
  * 
  * @package     Comodojo Spare Parts
  * @author      Marco Giovinazzi <info@comodojo.org>
