@@ -52,7 +52,7 @@ class Column {
 
     private $primaryKey = null;
 
-    static private $supported_column_types = array('STRING','INTEGER','FLOAT','DECIMAL','BOOL','TIME','DATE','TIMESTAMP','TEXT','BLOB');
+    static private $supported_column_types = array('STRING','INTEGER','FLOAT','DECIMAL','BOOL','TIME','DATE','DATETIME','TIMESTAMP','TEXT','BLOB');
 
     static private $supported_column_conversions = array(
 
@@ -60,10 +60,11 @@ class Column {
             "STRING"    =>  "VARCHAR",
             "INTEGER"   =>  "INTEGER",
             "FLOAT"     =>  "FLOAT",
-            "DECIMAL"   =>  "BOOL",
-            "BOOL"      =>  "TIME",
-            "TIME"      =>  "DATETIME",
+            "DECIMAL"   =>  "DECIMAL",
+            "BOOL"      =>  "BOOL",
+            "TIME"      =>  "TIME",
             "DATE"      =>  "DATE",
+            "DATETIME"  =>  "DATETIME",
             "TIMESTAMP" =>  "TIMESTAMP",
             "TEXT"      =>  "TEXT",
             "BLOB"      =>  "BLOB"
@@ -73,10 +74,11 @@ class Column {
             "STRING"    =>  "VARCHAR",
             "INTEGER"   =>  "INTEGER",
             "FLOAT"     =>  "FLOAT4",
-            "DECIMAL"   =>  "BOOL",
-            "BOOL"      =>  "TIME",
-            "TIME"      =>  "DATETIME",
+            "DECIMAL"   =>  "DECIMAL",
+            "BOOL"      =>  "BOOL",
+            "TIME"      =>  "TIME",
             "DATE"      =>  "DATE",
+            "DATETIME"  =>  "DATETIME",
             "TIMESTAMP" =>  "TIMESTAMP",
             "TEXT"      =>  "TEXT",
             "BLOB"      =>  "BYTEA"
@@ -87,9 +89,10 @@ class Column {
             "INTEGER"   =>  "NUMBER",
             "FLOAT"     =>  "FLOAT",
             "DECIMAL"   =>  "NUMBER",
-            "BOOL"      =>  "DATE",
+            "BOOL"      =>  "NUMBER(1)",
             "TIME"      =>  "DATE",
             "DATE"      =>  "DATE",
+            "DATETIME"  =>  "DATE",
             "TIMESTAMP" =>  "DATE",
             "TEXT"      =>  "CLOB",
             "BLOB"      =>  "BLOB"
@@ -100,9 +103,10 @@ class Column {
             "INTEGER"   =>  "INTEGER",
             "FLOAT"     =>  "REAL",
             "DECIMAL"   =>  "INTEGER",
-            "BOOL"      =>  "TIME",
+            "BOOL"      =>  "INTEGER(1)",
             "TIME"      =>  "DATE",
             "DATE"      =>  "DATE",
+            "DATETIME"  =>  "DATE",
             "TIMESTAMP" =>  "TIMESTAMP",
             "TEXT"      =>  "CLOB",
             "BLOB"      =>  "BLOB"
@@ -112,10 +116,11 @@ class Column {
             "STRING"    =>  "NVARCHAR",
             "INTEGER"   =>  "INTEGER",
             "FLOAT"     =>  "FLOAT",
-            "DECIMAL"   =>  "BIT",
-            "BOOL"      =>  "TIME",
-            "TIME"      =>  "DATETIME",
+            "DECIMAL"   =>  "DECIMAL",
+            "BOOL"      =>  "BIT",
+            "TIME"      =>  "TIME",
             "DATE"      =>  "DATE",
+            "DATETIME"  =>  "DATETIME",
             "TIMESTAMP" =>  "TIMESTAMP",
             "TEXT"      =>  "NVARCHAR",
             "BLOB"      =>  "BLOB"
@@ -125,10 +130,11 @@ class Column {
             "STRING"    =>  "TEXT",
             "INTEGER"   =>  "INTEGER",
             "FLOAT"     =>  "REAL",
-            "DECIMAL"   =>  "INTEGER",
-            "BOOL"      =>  "TEXT",
+            "DECIMAL"   =>  "NUMERIC",
+            "BOOL"      =>  "NUMERIC",
             "TIME"      =>  "TEXT",
             "DATE"      =>  "TEXT",
+            "DATETIME"  =>  "TEXT",
             "TIMESTAMP" =>  "TEXT",
             "TEXT"      =>  "TEXT",
             "BLOB"      =>  "BLOB"
