@@ -342,6 +342,17 @@ class Database {
         return $this->length;
 
     }
+    
+    /**
+     * Get database handler
+     *
+     * @return  Object
+     */
+    final public function getHandler() {
+
+        return $this->dbh;
+
+    }
 
     /**
      * Connecto to database
