@@ -528,7 +528,7 @@ class Database {
                     default:        $fetch = MYSQLI_BOTH;   break;
                 }
                 
-                $this->length = $data->num_rows;
+                $this->length = is_object($data) ? $data->num_rows : 0;
                 $this->id     = $this->dbh->insert_id;
                 $this->rows   = $this->dbh->affected_rows;
 
@@ -537,7 +537,7 @@ class Database {
                     $iterator++;
                 }
 
-                if ($data != TRUE) $data->free();
+                if ( is_object($data) ) $data->free();
 
                 break;
 
