@@ -1,4 +1,4 @@
-dispatcher.plugin.database
-==========================
+comodojo/database
+=================
 
-Database connect/query plugin for comodojo
+Multi-database library for comodojo
