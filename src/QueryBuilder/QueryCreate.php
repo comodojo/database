@@ -55,14 +55,22 @@ class QueryCreate {
     
     }
     
-    final public function name($data) {
+    // final public function name($data) {
+    
+    //     $this->name = $data;
+    
+    //     return $this;
+    
+    // }
+    
+    final public function table($data) {
     
         $this->name = $data;
     
         return $this;
     
     }
-    
+
     final public function columns($data) {
     
         $this->columns = $data;
@@ -84,13 +92,15 @@ class QueryCreate {
             case 'MYSQLI':
             case 'MYSQL_PDO':
 
-                $table_pattern = "`*_DBPREFIX_*%s`";
+                // $table_pattern = "`*_DBPREFIX_*%s`";
 
-                $table = sprintf($table_pattern, trim($this->name));
+                // $table = sprintf($table_pattern, trim($this->name));
 
                 $query_pattern = "CREATE TABLE%s %s (%s)%s";
 
-                $query = sprintf($query_pattern, $if_not_exists, $table, implode(', ',$this->columns), $engine);
+                // $query = sprintf($query_pattern, $if_not_exists, $table, implode(', ',$this->columns), $engine);
+
+                $query = sprintf($query_pattern, $if_not_exists, $this->name, implode(', ',$this->columns), $engine);
 
                 break;
 
@@ -101,13 +111,15 @@ class QueryCreate {
             case 'SQLITE_PDO':
             default:
 
-                $table_pattern = "*_DBPREFIX_*%s";
+                // $table_pattern = "*_DBPREFIX_*%s";
 
-                $table = sprintf($table_pattern, trim($this->name));
+                // $table = sprintf($table_pattern, trim($this->name));
 
                 $query_pattern = "CREATE TABLE%s %s (%s)";
 
-                $query = sprintf($query_pattern, $if_not_exists, $table, implode(', ',$this->columns));
+                // $query = sprintf($query_pattern, $if_not_exists, $table, implode(', ',$this->columns));
+
+                $query = sprintf($query_pattern, $if_not_exists, $this->name, implode(', ',$this->columns));
 
                 break;
         

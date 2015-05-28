@@ -312,6 +312,22 @@ class Column {
 
     }
 
+    static public function create($name, $type) {
+
+        try {
+
+            $column = new Column($name, $type);
+            
+        } catch (DatabaseException $de) {
+            
+            throw $de;
+
+        }
+
+        return $column;
+
+    }
+
     private function mysqlColumnDefinition() {
 
         $length = is_null($this->length) ? null : "(".intval($this->length).")";

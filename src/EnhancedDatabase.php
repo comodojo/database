@@ -1,5 +1,12 @@
 <?php namespace Comodojo\Database;
 
+use \Comodojo\Database\QueryBuilder\QueryGet;
+use \Comodojo\Database\QueryBuilder\QueryStore;
+use \Comodojo\Database\QueryBuilder\QueryUpdate;
+use \Comodojo\Database\QueryBuilder\QueryDelete;
+use \Comodojo\Database\QueryBuilder\QueryTruncate;
+use \Comodojo\Database\QueryBuilder\QueryCreate;
+use \Comodojo\Database\QueryBuilder\QueryDrop;
 use \Comodojo\Exception\DatabaseException;
 use \Exception;
 
@@ -130,8 +137,18 @@ class EnhancedDatabase extends Database {
      */
     private $columns = array();
 
+    /**
+     * If true, builder will reset itself after each build
+     *
+     * @var bool
+     */
     private $auto_clean = false;
 
+    /**
+     * List of currently supported types of query
+     *
+     * @var array
+     */
     static private $supported_query_types = array('GET','STORE','UPDATE','DELETE','TRUNCATE','CREATE','DROP'/*,'ALTER'*/);
 
     /**
@@ -139,7 +156,7 @@ class EnhancedDatabase extends Database {
      *
      * @param   bool    $mode
      *
-     * @return  Object  $this
+     * @return  \Comodojo\Database\EnhancedDatabase
      */
     final public function autoClean($mode=true) {
 
@@ -153,8 +170,10 @@ class EnhancedDatabase extends Database {
      * Return the current query as a string
      *
      * @return  string
+     *
+     * @throws  \Comodojo\Exception\DatabaseException
      */
-    final public function getQuery($query, $parameters=array()) {
+    public function getQuery($query, $parameters=array()) {
 
         try {
             
@@ -177,21 +196,32 @@ class EnhancedDatabase extends Database {
      *
      * @param   string  $table
      *
-     * @return  Object  $this
+     * @return  \Comodojo\Database\EnhancedDatabase
+     *
+     * @throws  \Comodojo\Exception\DatabaseException
      */
-    final public function table($table) {
+    public function table($table) {
 
         $table_pattern = in_array($this->model, Array('MYSQLI','MYSQL_PDO')) ? "`*_DBPREFIX_*%s`" : "*_DBPREFIX_*%s";
 
-        if ( empty($table) ) throw new DatabaseException('Invalid table name',1010);
+        if ( empty($table) ) throw new DatabaseException('Invalid table name');
 
-        else $this->table = sprintf($table_pattern,trim($table));
+        else if ( is_null($this->table) ) $this->table = sprintf($table_pattern,trim($table));
+
+        else $this->table .= ", ".sprintf($table_pattern,trim($table));
 
         return $this;
 
     }
 
-    final public function tablePrefix($prefix) {
+    /**
+     * Set the database tables' prefix
+     *
+     * @param   string  $table
+     *
+     * @return  \Comodojo\Database\EnhancedDatabase
+     */
+    public function tablePrefix($prefix) {
 
         $this->table_prefix = empty($prefix) ? null : $prefix;
 
@@ -204,11 +234,11 @@ class EnhancedDatabase extends Database {
      *
      * @param   bool    $value
      *
-     * @return  Object  $this
+     * @return  \Comodojo\Database\EnhancedDatabase
      */
-    final public function distinct(/*$value*/) {
+    final public function distinct($value=true) {
 
-        $this->distinct = true; /*filter_var($value, FILTER_VALIDATE_BOOLEAN);*/
+        $this->distinct = filter_var($value, FILTER_VALIDATE_BOOLEAN);
 
         return $this;
 
@@ -237,7 +267,9 @@ class EnhancedDatabase extends Database {
      *
      * @param   mixed   $keys
      *
-     * @return  Object  $this
+     * @return  \Comodojo\Database\EnhancedDatabase
+     *
+     * @throws  \Comodojo\Exception\DatabaseException
      */
     public function keys($keys) {
 
@@ -245,7 +277,7 @@ class EnhancedDatabase extends Database {
 
         try {
             
-            if ( empty($keys) ) throw new DatabaseException('Invalid key/s',1011);
+            if ( empty($keys) ) throw new DatabaseException('Invalid key/s');
 
             else if ( is_array($keys) ) foreach ($keys as $key) array_push($processed_keys, $this->composeKey($key));
 
@@ -275,7 +307,9 @@ class EnhancedDatabase extends Database {
      *
      * @param   mixed   $values
      *
-     * @return  Object  $this
+     * @return  \Comodojo\Database\EnhancedDatabase
+     *
+     * @throws  \Comodojo\Exception\DatabaseException
      */
     public function values($values) {
 
@@ -283,7 +317,7 @@ class EnhancedDatabase extends Database {
 
         try {
             
-            //if ( empty($values) ) throw new DatabaseException('Invalid value/s',1014);
+            //if ( empty($values) ) throw new DatabaseException('Invalid value/s');
 
             if ( is_array($values) ) foreach ($values as $value) array_push($processed_values, $this->composeValue($value));
 
@@ -325,7 +359,9 @@ class EnhancedDatabase extends Database {
      * @param   string  $operator
      * @param   mixed   $value
      *
-     * @return  Object  $this
+     * @return  \Comodojo\Database\EnhancedDatabase
+     *
+     * @throws  \Comodojo\Exception\DatabaseException
      */
     public function where($column, $operator, $value) {
         
@@ -351,7 +387,9 @@ class EnhancedDatabase extends Database {
      * @param   string  $operator
      * @param   mixed   $value
      *
-     * @return  Object  $this
+     * @return  \Comodojo\Database\EnhancedDatabase
+     *
+     * @throws  \Comodojo\Exception\DatabaseException
      */
     public function andWhere($column, $operator, $value) {
         
@@ -377,7 +415,9 @@ class EnhancedDatabase extends Database {
      * @param   string  $operator
      * @param   mixed   $value
      *
-     * @return  Object  $this
+     * @return  \Comodojo\Database\EnhancedDatabase
+     *
+     * @throws  \Comodojo\Exception\DatabaseException
      */
     public function orWhere($column, $operator, $value) {
         
@@ -406,7 +446,9 @@ class EnhancedDatabase extends Database {
      * @param   string  $join_type
      * @param   string  $table
      *
-     * @return  Object  $this
+     * @return  \Comodojo\Database\EnhancedDatabase
+     *
+     * @throws  \Comodojo\Exception\DatabaseException
      */
     public function join($join_type, $table, $as=null) {
         
@@ -414,7 +456,7 @@ class EnhancedDatabase extends Database {
 
         $join_type_list = Array('INNER','NATURAL','CROSS','LEFT','RIGHT','LEFT OUTER','RIGHT OUTER','FULL OUTER',null);
 
-        if ( !in_array($join, $join_type_list) OR empty($table) ) throw new DatabaseException('Invalid parameters for database join',1019);
+        if ( !in_array($join, $join_type_list) OR empty($table) ) throw new DatabaseException('Invalid parameters for database join');
 
         if ( is_null($as) ) {
 
@@ -445,13 +487,15 @@ class EnhancedDatabase extends Database {
      *
      * @param   mixed   $columns
      *
-     * @return  Object  $this
+     * @return  \Comodojo\Database\EnhancedDatabase
+     *
+     * @throws  \Comodojo\Exception\DatabaseException
      */
     public function using($columns) {
 
         $using_pattern = "USING (%s)";
 
-        if (empty($columns)) throw new DatabaseException('Invalid parameters for database::using',1020);
+        if (empty($columns)) throw new DatabaseException('Invalid parameters for database::using');
         
         $this->using = sprintf($using_pattern, is_array($columns) ? implode(',', $columns) : $columns);
         
@@ -466,7 +510,9 @@ class EnhancedDatabase extends Database {
      * @param   string  $operator
      * @param   string  $second_column
      *
-     * @return  Object  $this
+     * @return  \Comodojo\Database\EnhancedDatabase
+     *
+     * @throws  \Comodojo\Exception\DatabaseException
      */
     public function on($first_column, $operator, $second_column) {
 
@@ -492,7 +538,9 @@ class EnhancedDatabase extends Database {
      * @param   string  $operator
      * @param   string  $second_column
      *
-     * @return  Object  $this
+     * @return  \Comodojo\Database\EnhancedDatabase
+     *
+     * @throws  \Comodojo\Exception\DatabaseException
      */
     public function andOn($first_column, $operator, $second_column) {
 
@@ -518,7 +566,9 @@ class EnhancedDatabase extends Database {
      * @param   string  $operator
      * @param   string  $second_column
      *
-     * @return  Object  $this
+     * @return  \Comodojo\Database\EnhancedDatabase
+     *
+     * @throws  \Comodojo\Exception\DatabaseException
      */
     public function orOn($first_column, $operator, $second_column) {
 
@@ -543,11 +593,13 @@ class EnhancedDatabase extends Database {
      * @param   mixed   $columns
      * @param   mixed   $directions
      *
-     * @return  Object  $this
+     * @return  \Comodojo\Database\EnhancedDatabase
+     *
+     * @throws  \Comodojo\Exception\DatabaseException
      */
     public function orderBy($columns, $directions=null) {
 
-        if ( empty($columns) ) throw new DatabaseException('Invalid order by column',1012);
+        if ( empty($columns) ) throw new DatabaseException('Invalid order by column');
 
         $supported_directions = array("DESC", "ASC");
 
@@ -608,13 +660,15 @@ class EnhancedDatabase extends Database {
      *
      * @param   mixed   $columns
      *
-     * @return  Object  $this
+     * @return  \Comodojo\Database\EnhancedDatabase
+     *
+     * @throws  \Comodojo\Exception\DatabaseException
      */
     public function groupBy($columns) {
 
         $group_column_pattern = "%s";
 
-        if ( empty($columns) ) throw new DatabaseException('Invalid group by column',1013);
+        if ( empty($columns) ) throw new DatabaseException('Invalid group by column');
 
         elseif ( is_array($columns) ) {
 
@@ -642,17 +696,19 @@ class EnhancedDatabase extends Database {
     /**
      * Set the having clause in a sql statement.
      *
-     * Differently from other methods, $having_clause_or_array should contain the FULL CLAUSE.
+     * Differently from other methods, $having_clauses should contain the FULL CLAUSE.
      *
-     * @param mixed $having_clauses
+     * @param   mixed $having_clauses
      *
-     * @return array
+     * @return  \Comodojo\Database\EnhancedDatabase
+     *
+     * @throws  \Comodojo\Exception\DatabaseException
      */
     public function having($having_clauses) {
 
         $having_column_pattern = "%s";
 
-        if ( empty($having_clauses) ) throw new DatabaseException('Invalid having clause',1028);
+        if ( empty($having_clauses) ) throw new DatabaseException('Invalid having clause');
 
         elseif ( is_array($having_clauses) ) {
 
@@ -671,6 +727,13 @@ class EnhancedDatabase extends Database {
 
     }
 
+    /**
+     * Add a column in columns' list 
+     *
+     * @param   mixed $having_clauses
+     *
+     * @return  \Comodojo\Database\EnhancedDatabase
+     */
     public function column(\Comodojo\Database\QueryBuilder\Column $column) {
 
         array_push($this->columns, $column->getColumnDefinition($this->model));
@@ -679,16 +742,27 @@ class EnhancedDatabase extends Database {
 
     }
 
+    /**
+     * Perform a SELECT query
+     *
+     * @param   int    $limit
+     * @param   int    $offset
+     * @param   bool   $return_raw
+     *
+     * @return  mixed
+     *
+     * @throws  \Comodojo\Exception\DatabaseException
+     */
     public function get($limit=0, $offset=0, $return_raw=false) {
 
         try {
             
             $query = $this->buildQuery('GET', array(
-                "limit" =>  $limit,
-                "offset"=>  $offset
+                "limit"  =>  $limit,
+                "offset" =>  $offset
             ));
 
-            $result = $this->query($query, $return_raw);
+            $result = $return_raw == false ? $this->query($query) : $this->rawQuery($query);
 
         } catch (DatabaseException $de) {
             
@@ -700,13 +774,22 @@ class EnhancedDatabase extends Database {
 
     }
 
+    /**
+     * Perform a INSERT query
+     *
+     * @param   bool   $return_raw
+     *
+     * @return  mixed
+     *
+     * @throws  \Comodojo\Exception\DatabaseException
+     */
     public function store($return_raw=false) {
 
         try {
             
             $query = $this->buildQuery('STORE');
 
-            $result = $this->query($query, $return_raw);
+            $result = $return_raw == false ? $this->query($query) : $this->rawQuery($query);
 
         } catch (DatabaseException $de) {
             
@@ -718,13 +801,22 @@ class EnhancedDatabase extends Database {
 
     }
 
+    /**
+     * Perform a UPDATE query
+     *
+     * @param   bool   $return_raw
+     *
+     * @return  mixed
+     *
+     * @throws  \Comodojo\Exception\DatabaseException
+     */
     public function update($return_raw=false) {
 
         try {
             
             $query = $this->buildQuery('UPDATE');
 
-            $result = $this->query($query, $return_raw);
+            $result = $return_raw == false ? $this->query($query) : $this->rawQuery($query);
 
         } catch (DatabaseException $de) {
             
@@ -736,13 +828,22 @@ class EnhancedDatabase extends Database {
 
     }
 
+    /**
+     * Perform a DELETE query
+     *
+     * @param   bool   $return_raw
+     *
+     * @return  mixed
+     *
+     * @throws  \Comodojo\Exception\DatabaseException
+     */
     public function delete($return_raw=false) {
 
         try {
             
             $query = $this->buildQuery('DELETE');
 
-            $result = $this->query($query, $return_raw);
+            $result = $return_raw == false ? $this->query($query) : $this->rawQuery($query);
 
         } catch (DatabaseException $de) {
             
@@ -754,13 +855,22 @@ class EnhancedDatabase extends Database {
 
     }
 
+    /**
+     * Perform a TRUNCATE query
+     *
+     * @param   bool   $return_raw
+     *
+     * @return  mixed
+     *
+     * @throws  \Comodojo\Exception\DatabaseException
+     */
     public function truncate($return_raw=false) {
 
         try {
             
             $query = $this->buildQuery('TRUNCATE');
 
-            $result = $this->query($query, $return_raw);
+            $result = $return_raw == false ? $this->query($query) : $this->rawQuery($query);
 
         } catch (DatabaseException $de) {
             
@@ -772,19 +882,31 @@ class EnhancedDatabase extends Database {
 
     }
 
-    public function create($name, $if_not_exists=false, $engine=null, $return_raw=false) {
+    /**
+     * Perform a CREATE query
+     *
+     * @param   string  $name
+     * @param   bool    $if_not_exists
+     * @param   string  $engine
+     * @param   bool    $return_raw
+     *
+     * @return  mixed
+     *
+     * @throws  \Comodojo\Exception\DatabaseException
+     */
+    public function create($if_not_exists=false, $engine=null, $return_raw=false) {
 
-        if ( empty($name) ) throw new DatabaseException("Invalid or empty table name");
+        //if ( empty($name) ) throw new DatabaseException("Invalid or empty table name");
         
         try {
             
             $query = $this->buildQuery('CREATE', array(
-                "name"          =>  $name,
+                //"name"          =>  $name,
                 "if_not_exists" =>  $if_not_exists,
                 "engine"        =>  $engine
             ));
 
-            $result = $this->query($query, $return_raw);
+            $result = $return_raw == false ? $this->query($query) : $this->rawQuery($query);
 
         } catch (DatabaseException $de) {
             
@@ -796,6 +918,16 @@ class EnhancedDatabase extends Database {
 
     }
 
+    /**
+     * Perform a DROP query
+     *
+     * @param   bool    $if_exists
+     * @param   bool    $return_raw
+     *
+     * @return  mixed
+     *
+     * @throws  \Comodojo\Exception\DatabaseException
+     */
     public function drop($if_exists=false, $return_raw=false) {
 
         try {
@@ -816,11 +948,37 @@ class EnhancedDatabase extends Database {
 
     }
 
+    /**
+     * Perform a query
+     *
+     * @param   stirng  $query
+     *
+     * @return  mixed
+     *
+     * @throws  \Comodojo\Exception\DatabaseException
+     */
     public function query($query, $return_raw=false) {
 
         $query = str_replace("*_DBPREFIX_*", $this->table_prefix, $query);
 
-        return parent::query($query, $return_raw);
+        return parent::query($query);
+
+    }
+
+    /**
+     * Perform a query and return raw results
+     *
+     * @param   stirng  $query
+     *
+     * @return  mixed
+     *
+     * @throws  \Comodojo\Exception\DatabaseException
+     */
+    public function rawQuery($query) {
+
+        $query = str_replace("*_DBPREFIX_*", $this->table_prefix, $query);
+
+        return parent::rawQuery($query);
 
     }
 
@@ -875,6 +1033,13 @@ class EnhancedDatabase extends Database {
 
     }
 
+    /**
+     * Convert a date string into default selected database's format
+     *
+     * @param  string  $dateString
+     *
+     * @return array
+     */
     public function convertDate($dateString) {
 
         $dateReal = strtotime($dateString);
@@ -909,6 +1074,13 @@ class EnhancedDatabase extends Database {
 
     }
 
+    /**
+     * Convert a time string into default selected database's format
+     *
+     * @param  string  $timeString
+     *
+     * @return array
+     */
     public function convertTime($timeString) {
 
         return ltrim($timeString,'T');
@@ -916,11 +1088,13 @@ class EnhancedDatabase extends Database {
     }
 
     /**
-     * Keys composer
+     * Keys' composer
      *
      * @param   string  $key
      *
      * @return  string
+     *
+     * @throws  \Comodojo\Exception\DatabaseException
      */
     private function composeKey($key) {
 
@@ -985,11 +1159,13 @@ class EnhancedDatabase extends Database {
     }
 
     /**
-     * Values composer
+     * Values' composer
      *
      * @param   string  $value
      *
      * @return  string
+     *
+     * @throws  \Comodojo\Exception\DatabaseException
      */
     private function composeValue($value) {
 
@@ -1079,7 +1255,7 @@ class EnhancedDatabase extends Database {
     }
 
     /**
-     * Where clause composer
+     * Where clauses' composer
      *
      * @param   mixed   $column
      * @param   string  $operator
@@ -1097,9 +1273,9 @@ class EnhancedDatabase extends Database {
 
             $clause_pattern = "(%s %s %s)";
 
-            if ( !in_array($operator, Array('AND','OR')) ) throw new DatabaseException('Invalid syntax for a where clause',1017);
+            if ( !in_array($operator, Array('AND','OR')) ) throw new DatabaseException('Invalid syntax for a where clause');
             
-            if ( sizeof($column) != 3 OR sizeof($value) != 3 ) throw new DatabaseException('Invalid syntax for a where clause',1017);
+            if ( sizeof($column) != 3 OR sizeof($value) != 3 ) throw new DatabaseException('Invalid syntax for a where clause');
 
             try {
 
@@ -1196,7 +1372,7 @@ class EnhancedDatabase extends Database {
 
                 default:
                     
-                    throw new DatabaseException('Invalid syntax for a where clause',1017);
+                    throw new DatabaseException('Invalid syntax for a where clause');
 
                     break;
 
@@ -1267,24 +1443,46 @@ class EnhancedDatabase extends Database {
             $to_return = sprintf($clause_pattern, $processed_column, $processed_operator, $processed_value);            
 
         }
-        else throw new DatabaseException('Invalid syntax for a where clause',1017);
+        
+        else throw new DatabaseException('Invalid syntax for a where clause');
 
         return $to_return;
 
     }
 
+    /**
+     * ON clauses' composer
+     *
+     * @param   string  $first_column
+     * @param   string  $operator
+     * @param   string  $second_column
+     *
+     * @return  string
+     *
+     * @throws  \Comodojo\Exception\DatabaseException
+     */
     private function composeOnClause($first_column, $operator, $second_column) {
 
         $valid_operators = Array('=','!=','>','>=','<','<=','<>');
 
         $on_pattern = "%s%s%s";
 
-        if ( !in_array($operator, $valid_operators) ) throw new DatabaseException('Invalid syntax for a on clause', 1021);
+        if ( !in_array($operator, $valid_operators) ) throw new DatabaseException('Invalid syntax for a on clause');
         
         return sprintf($on_pattern, $first_column, $operator, $second_column);
 
     }
 
+    /**
+     * Build the query
+     *
+     * @param   string  $query
+     * @param   array   $parameters
+     *
+     * @return  string
+     *
+     * @throws  \Comodojo\Exception\DatabaseException
+     */
     private function buildQuery($query, $parameters = array()) {
 
         if ( empty($query) ) throw new DatabaseException("Invalid query type");
@@ -1299,7 +1497,7 @@ class EnhancedDatabase extends Database {
 
                 case 'GET':
                     
-                    $builder = new \Comodojo\Database\QueryBuilder\QueryGet($this->model);
+                    $builder = new QueryGet($this->model);
 
                     if ( array_key_exists('limit', $parameters) ) $builder->limit($parameters['limit']);
                     if ( array_key_exists('offset', $parameters) ) $builder->offset($parameters['offset']); 
@@ -1321,7 +1519,7 @@ class EnhancedDatabase extends Database {
 
                 case 'STORE':
                     
-                    $builder = new \Comodojo\Database\QueryBuilder\QueryStore($this->model);
+                    $builder = new QueryStore($this->model);
 
                     $builder->table($this->table)
                         ->keys($this->keys)
@@ -1335,7 +1533,7 @@ class EnhancedDatabase extends Database {
 
                 case 'UPDATE':
                     
-                    $builder = new \Comodojo\Database\QueryBuilder\QueryUpdate($this->model);
+                    $builder = new QueryUpdate($this->model);
 
                     $builder->table($this->table)
                         ->where($this->where)
@@ -1348,7 +1546,7 @@ class EnhancedDatabase extends Database {
                 
                 case 'DELETE':
                     
-                    $builder = new \Comodojo\Database\QueryBuilder\QueryDelete($this->model);
+                    $builder = new QueryDelete($this->model);
 
                     $builder->table($this->table)->where($this->where);
 
@@ -1358,7 +1556,7 @@ class EnhancedDatabase extends Database {
 
                 case 'TRUNCATE':
                     
-                    $builder = new \Comodojo\Database\QueryBuilder\QueryTruncate($this->model);
+                    $builder = new QueryTruncate($this->model);
 
                     $builder->table($this->table);
 
@@ -1368,13 +1566,13 @@ class EnhancedDatabase extends Database {
 
                 case 'CREATE':
 
-                    $builder = new \Comodojo\Database\QueryBuilder\QueryCreate($this->model);
+                    $builder = new QueryCreate($this->model);
 
-                    if ( array_key_exists('name', $parameters) ) $builder->name($parameters['name']);
+                    //if ( array_key_exists('name', $parameters) ) $builder->name($parameters['name']);
                     if ( array_key_exists('if_not_exists', $parameters) ) $builder->ifNotExists($parameters['if_not_exists']);
                     if ( array_key_exists('engine', $parameters) ) $builder->engine($parameters['engine']);
 
-                    $builder->columns($this->columns);
+                    $builder->table($this->table)->columns($this->columns);
 
                     $composed_query = $builder->getQuery();
 
@@ -1382,7 +1580,7 @@ class EnhancedDatabase extends Database {
 
                 case 'DROP':
 
-                    $builder = new \Comodojo\Database\QueryBuilder\QueryDrop($this->model);
+                    $builder = new QueryDrop($this->model);
 
                     if ( array_key_exists('if_exists', $parameters) ) $builder->ifExists($parameters['if_exists']);
                     
