@@ -22,184 +22,157 @@ use \Exception;
  */
 
 class QueryResult {
+    
+    /**
+     * Transaction id (if any)
+     * 
+     * @var integer
+     */
+    private $id = null;
 
+    /**
+     * Affected rows
+     * 
+     * @var integer
+     */
+    private $rows = null;
+
+    /**
+     * Length of result
+     * 
+     * @var integer
+     */
+    private $length = null;
+    
+    /**
+     * Result's raw data
+     * 
+     * @var mixed
+     */
     private $raw_data = null;
     
+    /**
+     * Handler from Database class
+     * 
+     * @var Object
+     */
     private $handler = null;
     
+    /**
+     * Model from Database class
+     * 
+     * @var string
+     */
     private $model = null;
     
-    private $fetch_mode = 'ASSOC';
+    /**
+     * Fetch mode from Database class
+     * 
+     * @var string
+     */
+    private $fetch = 'ASSOC';
 
-    final static public function create($raw_data, $handler, $model) {
+    /**
+     * Build a result set
+     *
+     * @return   \Comodojo\Database\QueryResult
+     * 
+     * @throws   \Comodojo\Exception\DatabaseException
+     */
+    public function __construct($handler, $model, $fetch, $data) {
         
-        $result = new Result();
+        $this->setHandler($handler);
         
-        $result->setRawData($raw_data)->setHandler($handler, $model);
+        $this->setModel($model);
         
-        return $result;
+        $this->setFetch($fetch);
+        
+        try {
+            
+            $this->setRawData($data);
+            
+        } catch (DatabaseException $de) {
+            
+            throw $de;
+            
+        }
         
     }
 
-    private function setRawData($data) {
+    /**
+     * Get database handler
+     *
+     * @return   Object  $handler
+     */
+    final public function getHandler() {
         
-        $this->raw_data = $data;
-        
-        return $this;
-        
-    }
-    
-    private function setHandler($handler, $model) {
-        
-        $this->handler = $handler;
-        
-        $this->model = $model;
-        
-        return $this;
+        return $this->handler;
         
     }
     
     /**
-     * Set fetch mode
+     * Get database model
      *
-     * @param   string  $mode   Fetch mode (ASSOC, NUM, BOTH)
-     *
-     * @return  Object          $this
+     * @return  string
      */
-    final public function setFetchMode($mode) {
-
-        if ( in_array(strtoupper($mode), Array('ASSOC','NUM','BOTH')) ) {
-
-            $this->fetch_mode = strtoupper($mode);
-
-        }
-        else throw new DatabaseException('Invalid data fetch mode');
-
-        return $this;
-
-    }
-    
-    final public function getFetchMode() {
+    final public function getModel() {
         
-        return $this->fetch_mode;
+        return $this->model;
         
     }
     
+    /**
+     * Get database fetch mode
+     *
+     * @return  string
+     */
+    final public function getFetch() {
+        
+        return $this->fetch;
+        
+    }
+    
+    /**
+     * Get raw data from query's result
+     *
+     * @return  mixed
+     */
     final public function getRawData() {
         
-        return $this->rawData;
+        return $this->raw_data;
         
     }
-    
-    final public function getData() {
-    	
-    	try {
-    		
-            $result = self::dataToArray($this->raw_data, $this->model, $this->fetch_mode);
-    		
-    	} catch (DatabaseException $de) {
-    		
-    		throw $de;
-    		
-    	}
-    	
-    	return $result;
-    	
-    }
-    
-    final public function getLength() {
-        
-        $length = 0;
-        
-        switch ($model) {
-        
-            case ("MYSQLI"):
-                
-                $length = is_object($raw_data) ? $raw_data->num_rows : 0;
-                
-                break;
-
-            case ("MYSQL_PDO"):
-            case ("SQLITE_PDO"):
-            
-                $length = sizeof($result);
-                
-                break;
-            
-            case ("ORACLE_PDO"):
-        
-                $this->length = sizeof($result);
-                
-                break;
-                
-            case ("DBLIB_PDO"):
-
-                $this->length = sizeof($result);
-                
-                break;
-                
-            case ("DB2"):
-
-                $this->length = db2_num_fields($data);
-                
-                break;
-
-            case ("POSTGRESQL"):
-                
-                $this->length = pg_num_rows($data);
-                
-                break;
-
-        }
-        
-        return $length;
-        
-    }
-    
-    final public function getId() {
-        
-        
-        
-    }
-    
-    final public function getAffectedRows() {}
     
     /**
-     * Transform database raw result in a standard array
-     *
-     * @param   mixed   $rawData   Raw data from database handler
+     * Get result's data as an array (indexed according to fetch method selected)
      *
      * @return  array
      */
-    static private function dataToArray($data, $model, $fetch_mode) {
-
-        $result = Array();
+    public function getData() {
         
-        switch ($model) {
+        $result = array();
+        
+        $iterator = 0;
+
+        switch ($this->model) {
 
             case ("MYSQLI"):
                 
-                if ( ( !is_object($data) OR !is_a($data, 'mysqli_result') ) AND $data != TRUE ) throw new DatabaseException('Invalid result data for model '.$model);
-
-                switch ($fetch_mode) {
+                switch ($this->fetch) {
                     case 'NUM':     $fetch = MYSQLI_NUM;    break;
                     case 'ASSOC':   $fetch = MYSQLI_ASSOC;  break;
                     default:        $fetch = MYSQLI_BOTH;   break;
                 }
                 
-                $length = is_object($data) ? $data->num_rows : 0;
-                
-                $iterator = 0;
-
-                while($iterator < $this->length) {
+                while( $iterator < $this->raw_data->num_rows ) {
                     
-                    $result[$iterator] = $data->fetch_array($fetch);
+                    $result[$iterator] = $this->raw_data->fetch_array($fetch);
                     
                     $iterator++;
                     
                 }
 
-                // if ( is_object($data) ) $data->free();
+                //if ( is_object($this->raw_data) ) $this->raw_data->free();
 
                 break;
 
@@ -207,53 +180,67 @@ class QueryResult {
             case ("SQLITE_PDO"):
             case ("ORACLE_PDO"):
             case ("DBLIB_PDO"):
-                
-                if ( !is_object($data) ) throw new DatabaseException('Invalid result data for model '.$model);
-
-                switch ($fetch_mode) {
+            
+                switch ($this->fetch) {
                     case 'NUM':     $fetch = \PDO::FETCH_NUM;    break;
                     case 'ASSOC':   $fetch = \PDO::FETCH_ASSOC;  break;
                     default:        $fetch = \PDO::FETCH_BOTH;   break;
                 }
 
-                try {
-                    
-                    $result = $data->fetchAll($fetch);
-
-                } catch (\PDOException $pe) {
-                    
-                    throw new DatabaseException( $pe->getMessage(), $pe->getCode() );
-
-                }
+                $result = $this->raw_data->fetchAll($fetch);
 
                 break;
-
+            
             case ("DB2"):
 
-                if ( !is_resource($data) OR @get_resource_type($data) != "DB2 Statement" ) throw new DatabaseException('Invalid result data for model '.$model);
-
-                switch ($fetch_mode) {
-                    case 'NUM':     while ($row = db2_fetch_row($data)) array_push($result, $row);      break;
-                    case 'ASSOC':   while ($row = db2_fetch_assoc($data)) array_push($result, $row);    break;
-                    default:        while ($row = db2_fetch_both($data)) array_push($result, $row);     break;
+                switch ($this->fetch) {
+                    
+                    case 'NUM':
+                        
+                        while ( $row = db2_fetch_row($this->raw_data) ) array_push($result, $row);
+                        
+                        break;
+                    
+                    case 'ASSOC':
+                        
+                        while ( $row = db2_fetch_assoc($this->raw_data) ) array_push($result, $row);
+                        
+                        break;
+                    
+                    default:
+                        
+                        while ( $row = db2_fetch_both($this->raw_data) ) array_push($result, $row);
+                        
+                        break;
+                
                 }
 
                 break;
 
             case ("POSTGRESQL"):
 
-                if ( !is_resource($data) OR @get_resource_type($data) != "pgsql result" ) throw new DatabaseException('Invalid result data for model '.$model);
-                
-                $iterator = 0;
-                
-                $length = pg_num_rows($data);
-                
-                while($iterator < $length) {
+                while( $iterator < pg_num_rows($this->raw_data) ) {
                     
-                    switch ($fetch_mode) {
-                        case 'NUM':     $result[$iterator] = pg_fetch_array($data); break;
-                        case 'ASSOC':   $result[$iterator] = pg_fetch_assoc($data); break;
-                        default:        $result[$iterator] = pg_fetch_all($data);   break;
+                    switch ($this->fetch) {
+                        
+                        case 'NUM':
+                            
+                            $result[$iterator] = pg_fetch_array($this->raw_data);
+                            
+                            break;
+                        
+                        case 'ASSOC':
+                            
+                            $result[$iterator] = pg_fetch_assoc($this->raw_data);
+                            
+                            break;
+                        
+                        default:
+                            
+                            $result[$iterator] = pg_fetch_all($this->raw_data);
+                            
+                            break;
+                            
                     }
                     
                     $iterator++;
@@ -263,8 +250,333 @@ class QueryResult {
                 break;
 
         }
-
+        
         return $result;
+        
+    }
+    
+    /**
+     * Get length of result returned from query
+     *
+     * @return  int
+     */
+    public function getLength() {
+        
+        switch ($this->model) {
+
+            case ("MYSQLI"):
+                
+                $return = $this->raw_data->num_rows;
+                
+                break;
+
+            case ("MYSQL_PDO"):
+            case ("SQLITE_PDO"):
+            case ("ORACLE_PDO"):
+            case ("DBLIB_PDO"):
+                
+                $return = $this->raw_data->columnCount();
+                
+                break;
+
+            case ("DB2"):
+
+                $return = db2_num_fields($this->raw_data);
+                
+                break;
+
+            case ("POSTGRESQL"):
+
+                $return = pg_num_rows($this->raw_data);
+                
+                break;
+
+        }
+
+        return $return;
+        
+    }
+    
+    /**
+     * Get number of rows affected by query
+     *
+     * @return  int
+     */
+    public function getAffectedRows() {
+        
+        switch ($this->model) {
+
+            case ("MYSQLI"):
+                
+                $return = $this->handler->affected_rows;
+                
+                break;
+
+            case ("MYSQL_PDO"):
+            case ("SQLITE_PDO"):
+            case ("ORACLE_PDO"):
+            case ("DBLIB_PDO"):
+                
+                $return = $this->raw_data->columnCount();
+                
+                break;
+
+            case ("DB2"):
+
+                $return = db2_num_rows($this->raw_data);
+                
+                break;
+
+            case ("POSTGRESQL"):
+
+                $return = pg_affected_rows($this->raw_data);
+                
+                break;
+
+        }
+
+        return $return;
+        
+    }
+    
+    /**
+     * Get last insert id (if available)
+     *
+     * @return  int
+     * 
+     * @throws  \Comodojo\Exception\DatabaseException
+     */
+    public function getInsertId() {
+        
+        switch ($this->model) {
+
+            case ("MYSQLI"):
+                
+                $return = $this->handler->insert_id;
+                
+                break;
+
+            case ("MYSQL_PDO"):
+            case ("SQLITE_PDO"):
+            
+                $return = $this->handler->lastInsertId();
+
+                break;
+            
+            case ("ORACLE_PDO"):
+        
+                try {
+            
+                    $return = self::oracleLastInsertId($this->handler);
+                    
+                } catch (DatabaseException $de) {
+                    
+                    throw $de;
+                    
+                }
+
+                break;
+                
+            case ("DBLIB_PDO"):
+
+                try {
+            
+                    $return = self::dblibLastInsertId($this->handler);
+                    
+                } catch (DatabaseException $de) {
+                    
+                    throw $de;
+                    
+                }
+
+                break;
+
+            case ("DB2"):
+
+                $return = db2_last_insert_id($this->handler);
+                
+                break;
+
+            case ("POSTGRESQL"):
+
+                $return = pg_last_oid($this->raw_data);
+
+                break;
+
+        }
+
+        return $return;
+        
+    }
+    
+    /**
+     * Set database handler
+     *
+     * @param   Object  $handler
+     *
+     * @return  Object  \Comodojo\Database\QueryResult
+     */
+    private function setHandler($handler) {
+        
+        $this->handler = $handler;
+        
+        return $this;
+        
+    }
+    
+    /**
+     * Set database model
+     *
+     * @param   string  $model
+     *
+     * @return  Object  \Comodojo\Database\QueryResult
+     */
+    private function setModel($model) {
+        
+        $this->model = $model;
+        
+        return $this;
+        
+    }
+    
+    /**
+     * Set database fetch mode
+     *
+     * @param   string  $fetch
+     *
+     * @return  Object  \Comodojo\Database\QueryResult
+     */
+    private function setFetch($fetch) {
+        
+        $this->fetch = $fetch;
+        
+        return $this;
+        
+    }
+    
+    /**
+     * Set raw data from query's result
+     *
+     * @param   Object  $data
+     *
+     * @return  Object  \Comodojo\Database\QueryResult
+     * 
+     * @throws  \Comodojo\Exception\DatabaseException
+     */
+    private function setRawData($data) {
+        
+        if ( self::checkRawData($data,$this->model) == false ) throw new DatabaseException("Invalid result statement for selected model");
+        
+        $this->raw_data = $data;
+        
+        return $this;
+        
+    }
+    
+    /**
+     * Check if raw data (statement) matches the expeced one
+     *
+     * @param   Object  $data
+     * @param   string  $model
+     *
+     * @return  bool
+     */
+    static private function checkRawData($data, $model) {
+    
+        switch ($model) {
+
+            case ("MYSQLI"):
+                
+                $return = ( $data instanceof \mysqli_result );
+                
+                break;
+
+            case ("MYSQL_PDO"):
+            case ("SQLITE_PDO"):
+            case ("ORACLE_PDO"):
+            case ("DBLIB_PDO"):
+                
+                $return = ( $data instanceof \PDOStatement );
+                
+                break;
+
+            case ("DB2"):
+
+                $return = ( is_resource($data) AND @get_resource_type($data) == "DB2 Statement" );
+                
+                break;
+
+            case ("POSTGRESQL"):
+
+                $return = ( is_resource($data) AND @get_resource_type($data) == "pgsql result" );
+                
+                break;
+
+        }
+        
+        return $return;
+    
+    }
+    
+    /**
+     * Trik to enable last insert id (scope-relative) for dblib PDO, since
+     * lastInsertId() is not supported by driver
+     *
+     * @return  int
+     * 
+     * @throws  \Comodojo\Exception\DatabaseException
+     */
+    static private function dblibLastInsertId($handler) {
+
+        $query = "SELECT SCOPE_IDENTITY() as id";
+
+        try {
+
+            $response = $handler->prepare($query);
+            
+            $response->execute();
+            
+            $id = $response->fetchAll(\PDO::FETCH_ASSOC);
+
+        }
+        catch (\PDOException $e) {
+
+            throw new DatabaseException($e->getMessage(), (int)$e->getCode());
+
+        }
+
+        return is_null($id[0]['id']) ? null : intval($id[0]['id']);
+
+    }
+    
+    /**
+     * Trik to enable last insert id (session-relative) for ORACLE_PDO, since
+     * lastInsertId() is not supported by driver
+     *
+     * @return  int
+     * 
+     * @throws  \Comodojo\Exception\DatabaseException
+     */
+    static private function oracleLastInsertId($handler) {
+
+        $query = "SELECT id.currval as id from dual";
+
+        try {
+
+            $response = $handler->prepare($query);
+            
+            $response->execute();
+            
+            $id = $response->fetchAll(\PDO::FETCH_ASSOC);
+
+        }
+        catch (\PDOException $e) {
+
+            throw new DatabaseException($e->getMessage(), (int)$e->getCode());
+
+        }
+
+        return is_null($id[0]['id']) ? null : intval($id[0]['id']);
 
     }
     
