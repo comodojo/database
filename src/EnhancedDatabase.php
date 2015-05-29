@@ -894,7 +894,7 @@ class EnhancedDatabase extends Database {
      *
      * @throws  \Comodojo\Exception\DatabaseException
      */
-    public function create($if_not_exists=false, $engine=null, $return_raw=false) {
+    public function create($if_not_exists=false, $engine=null, $charset=null, $collate=null $return_raw=false) {
 
         //if ( empty($name) ) throw new DatabaseException("Invalid or empty table name");
         
@@ -903,7 +903,9 @@ class EnhancedDatabase extends Database {
             $query = $this->buildQuery('CREATE', array(
                 //"name"          =>  $name,
                 "if_not_exists" =>  $if_not_exists,
-                "engine"        =>  $engine
+                "engine"        =>  $engine,
+                "charset"       =>  $charset,
+                "collate"       =>  $collate
             ));
 
             $result = $return_raw == false ? $this->query($query) : $this->rawQuery($query);
@@ -936,7 +938,7 @@ class EnhancedDatabase extends Database {
                 "if_exists" =>  $if_exists
             ));
 
-            $result = $this->query($query, $return_raw);
+            $result = $return_raw == false ? $this->query($query) : $this->rawQuery($query);
 
         } catch (DatabaseException $de) {
             
@@ -1571,6 +1573,8 @@ class EnhancedDatabase extends Database {
                     //if ( array_key_exists('name', $parameters) ) $builder->name($parameters['name']);
                     if ( array_key_exists('if_not_exists', $parameters) ) $builder->ifNotExists($parameters['if_not_exists']);
                     if ( array_key_exists('engine', $parameters) ) $builder->engine($parameters['engine']);
+                    if ( array_key_exists('charset', $parameters) ) $builder->charset($parameters['charset']);
+                    if ( array_key_exists('collate', $parameters) ) $builder->collate($parameters['collate']);
 
                     $builder->table($this->table)->columns($this->columns);
 

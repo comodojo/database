@@ -28,6 +28,8 @@ class QueryCreate {
     private $if_not_exists = null;
 
     private $engine = null;
+    
+    private $charset = null;
 
     private $name = null;
 
@@ -55,13 +57,21 @@ class QueryCreate {
     
     }
     
-    // final public function name($data) {
+    final public function charset($charset) {
     
-    //     $this->name = $data;
+        $this->charset = $charset;
     
-    //     return $this;
+        return $this;
     
-    // }
+    }
+    
+    final public function collate($collate) {
+    
+        $this->collate = $collate;
+    
+        return $this;
+    
+    }
     
     final public function table($data) {
     
@@ -86,6 +96,10 @@ class QueryCreate {
         $if_not_exists = is_null($this->if_not_exists) ? null : " IF NOT EXISTS";
 
         $engine = is_null($this->engine) ? null : ' ENGINE '.$this->engine;
+        
+        $charset = is_null($this->charset) ? null : ' DEFAULT CHARSET='.$this->charset;
+        
+        $collate = is_null($this->collate) ? null : ' COLLATE='.$this->collate;
 
         switch ($this->model) {
 
@@ -96,11 +110,11 @@ class QueryCreate {
 
                 // $table = sprintf($table_pattern, trim($this->name));
 
-                $query_pattern = "CREATE TABLE%s %s (%s)%s";
+                $query_pattern = "CREATE TABLE%s %s (%s)%s%s%s";
 
                 // $query = sprintf($query_pattern, $if_not_exists, $table, implode(', ',$this->columns), $engine);
 
-                $query = sprintf($query_pattern, $if_not_exists, $this->name, implode(', ',$this->columns), $engine);
+                $query = sprintf($query_pattern, $if_not_exists, $this->name, implode(', ',$this->columns), $engine, $charset, $collate);
 
                 break;
 

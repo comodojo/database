@@ -1,10 +1,10 @@
 <?php
 
-class SqliteCreateTest extends \Comodojo\Database\Tests\Create {
+class SqliteDatabaseTest extends \Comodojo\Database\Tests\Database {
 
     public function setUp() {
 
-        $this->db = new \Comodojo\Database\EnhancedDatabase(
+        $this->db = new \Comodojo\Database\Database(
             'SQLITE_PDO',
             'localhost',
             1,
