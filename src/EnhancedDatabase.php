@@ -894,7 +894,7 @@ class EnhancedDatabase extends Database {
      *
      * @throws  \Comodojo\Exception\DatabaseException
      */
-    public function create($if_not_exists=false, $engine=null, $charset=null, $collate=null $return_raw=false) {
+    public function create($if_not_exists=false, $engine=null, $charset=null, $collate=null, $return_raw=false) {
 
         //if ( empty($name) ) throw new DatabaseException("Invalid or empty table name");
         

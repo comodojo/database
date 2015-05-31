@@ -99,11 +99,12 @@ class QueryStore {
 
             switch ($this->model) {
 
+
                 case ("MYSQLI"):
                 case ("MYSQL_PDO"):
-                case ("POSTGRESQL"):
                 case ("DB2"):
                 case ("DBLIB_PDO"):
+                case ("POSTGRESQL"):
 
                     $query_pattern = "INSERT INTO %s%s VALUES%s";
 
@@ -112,12 +113,24 @@ class QueryStore {
                     $query = sprintf($query_pattern, $this->table, " ".$keys, " ".$this->values);
 
                     break;
+
+                // case ("POSTGRESQL"):
+
+                //     $query_pattern = "INSERT INTO %s%s VALUES%s RETURNING id";
+
+                //     $keys = ( $this->keys == "*" OR is_null($this->keys) ) ? null : "(".$this->keys.")";
+
+                //     $query = sprintf($query_pattern, $this->table, " ".$keys, " ".$this->values);
+
+                //     break;
                 
                 case ("SQLITE_PDO"):
 
-                    $query_pattern = "INSERT INTO %s SELECT %s UNION SELECT %s";
+                    $query_pattern = "INSERT INTO %s %s SELECT %s UNION SELECT %s";
 
                     if ( $this->keys == "*" OR is_null($this->keys) ) throw new DatabaseException('SQLite require expllicit keys definition in multiple insert statement');
+
+                    $keys = "(".$this->keys.")";
 
                     $select = array();
 
@@ -127,7 +140,7 @@ class QueryStore {
 
                     foreach (array_slice($this->values_array, 1) as $values) array_push($union_select, implode(", ",$values));
 
-                    $query = sprintf($query_pattern, $this->table, implode(", ",$select), implode(" UNION SELECT ",$union_select));
+                    $query = sprintf($query_pattern, $this->table, $keys, implode(", ",$select), implode(" UNION SELECT ",$union_select));
 
                     break;
                     

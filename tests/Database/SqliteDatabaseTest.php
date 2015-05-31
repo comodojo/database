@@ -1,6 +1,6 @@
 <?php
 
-class SqliteDatabaseTest extends \Comodojo\Database\Tests\Database {
+class SqliteDatabaseTest extends \Comodojo\Database\Tests\Db {
 
     public function setUp() {
 

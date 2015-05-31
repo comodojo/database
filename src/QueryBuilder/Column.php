@@ -140,11 +140,12 @@ class Column {
     static private $column_patterns = array(
 
         "MYSQL"      => "`%s` %s%s%s%s %s%s%s%s%s",
-        "POSTGRESQL" => "%s %s%s%s%s %s%s%s%s%s",
+        //"POSTGRESQL" => "%s %s%s%s%s %s%s%s%s%s",
+        "POSTGRESQL" => "%s %s%s%s%s %s%s%s%s",
         "ORACLE"     => "%s %s%s%s%s %s%s%s%s%s",
         "DB2"        => "%s %s%s%s%s %s%s%s%s%s",
         "DBLIB"      => "%s %s%s%s%s %s%s%s%s%s",
-        "SQLITE"     => "`%s` %s%s %s%s%s%s"
+        "SQLITE"     => "`%s` %s%s %s%s%s%s%s"
 
     );
 
@@ -363,9 +364,12 @@ class Column {
 
     private function postgresqlColumnDefinition() {
 
+        $serial = false;
+
         $length = is_null($this->length) ? null : "(".intval($this->length).")";
 
-        $attr_1 = is_null($this->unsigned) ? (is_null($this->charset) ? null : $this->charset) : ' UNSIGNED';
+        //$attr_1 = is_null($this->unsigned) ? (is_null($this->charset) ? null : $this->charset) : ' UNSIGNED';
+        $attr_1 = is_null($this->charset) ? null : $this->charset;
 
         $attr_2 = is_null($this->zerofill) ? (is_null($this->collate) ? null : $this->collate) : ' ZEROFILL';
 
@@ -373,21 +377,23 @@ class Column {
 
         $defaultValue = is_null($this->defaultValue) ? null : ' DEFAULT '.$this->defaultValue;
 
-        $autoincrement = is_null($this->autoincrement) ? null : ' AUTO_INCREMENT';
+        //$autoincrement = is_null($this->autoincrement) ? null : ' AUTO_INCREMENT';
                 
         $unique = is_null($this->unique) ? null : ' UNIQUE';
 
         $primaryKey = is_null($this->primaryKey) ? null : ' PRIMARY KEY';
 
+        if ( $this->autoincrement == true AND $this->unsigned == true ) $serial = true;
+
         return sprintf(self::$column_patterns['POSTGRESQL'],
             $this->name,
-            self::$supported_column_conversions['POSTGRESQL'][$this->type],
+            !$serial ? self::$supported_column_conversions['POSTGRESQL'][$this->type] : "SERIAL",
             $length,
             $attr_1,
             $attr_2,
             $notNull,
             $defaultValue,
-            $autoincrement,
+            //$autoincrement,
             $unique,
             $primaryKey
         );
@@ -497,6 +503,8 @@ class Column {
 
         $primaryKey = is_null($this->primaryKey) ? null : ' PRIMARY KEY';
 
+        $autoincrement = is_null($this->autoincrement) ? null : ' AUTOINCREMENT';
+
         $attr_1 = is_null($this->unsigned) ? (is_null($this->collate) ? null : " COLLATE ".$this->collate) : (is_null($primaryKey) ? ' UNSIGNED' : null);
 
         $notNull = is_null($this->notNull) ? null : ' NOT NULL';
@@ -512,7 +520,8 @@ class Column {
             $notNull,
             $defaultValue,
             $unique,
-            $primaryKey
+            $primaryKey,
+            $autoincrement
         );
 
     }

@@ -5,7 +5,7 @@ use \Comodojo\Database\EnhancedDatabase;
 use \Comodojo\Database\QueryBuilder\Column;
 use \Exception;
 
-class EnhancedDatabase extends \PHPUnit_Framework_TestCase {
+class Edb extends \PHPUnit_Framework_TestCase {
 
     public function testCreate() {
 
@@ -56,9 +56,18 @@ class EnhancedDatabase extends \PHPUnit_Framework_TestCase {
         $this->db->autoClean();
         
         $result = $this->db->tablePrefix('test_')
+            ->table('peoples')
+            ->keys(array('firstname', 'lastname'))
+            ->values(array('ARTHUR','DENT'))
+            ->store();        
+
+        $this->assertInstanceOf('\Comodojo\Database\QueryResult', $result);
+
+        $this->assertSame(1, $result->getInsertId());
+
+        $result = $this->db->tablePrefix('test_')
         	->table('peoples')
         	->keys(array('firstname', 'lastname'))
-        	->values(array('ARTHUR','DENT'))
         	->values(array('FORD','PREFECT'))
         	->values(array('ZAPHOD','BEEBLEBROX'))
         	->values(array('Tricia','Mc Millan'))
@@ -66,7 +75,7 @@ class EnhancedDatabase extends \PHPUnit_Framework_TestCase {
         	->store();
         	
         $this->assertInstanceOf('\Comodojo\Database\QueryResult', $result);
-        	
+
         $result = $this->db->tablePrefix('test_')
         	->table('planets')
         	->keys('name')
@@ -78,6 +87,8 @@ class EnhancedDatabase extends \PHPUnit_Framework_TestCase {
         	->store();
         
         $this->assertInstanceOf('\Comodojo\Database\QueryResult', $result);
+
+        $this->assertSame(5, $result->getAffectedRows());
         
     }
     
@@ -91,6 +102,10 @@ class EnhancedDatabase extends \PHPUnit_Framework_TestCase {
         	->get();
         	
         $this->assertInstanceOf('\Comodojo\Database\QueryResult', $result);
+
+        $this->assertCount(5, $result->getData());
+
+        $this->assertSame(5, $result->getLength());
         	
         $result = $this->db->tablePrefix('test_')
         	->table('planets')
@@ -98,6 +113,8 @@ class EnhancedDatabase extends \PHPUnit_Framework_TestCase {
         	->get();
         
         $this->assertInstanceOf('\Comodojo\Database\QueryResult', $result);
+
+        $this->assertCount(5, $result->getData());
         
     }
     

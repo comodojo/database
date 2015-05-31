@@ -160,9 +160,9 @@ class Database {
      */
     public function fetch($mode) {
 
-        if ( in_array(strtoupper($fetch), Array('ASSOC','NUM','BOTH')) ) {
+        if ( in_array(strtoupper($mode), Array('ASSOC','NUM','BOTH')) ) {
 
-            $this->fetch = strtoupper($fetch);
+            $this->fetch = strtoupper($mode);
 
         }
         else throw new DatabaseException('Invalid data fetch method');

@@ -4,7 +4,7 @@ use \Comodojo\Exception\DatabaseException;
 use \Comodojo\Database\Database;
 use \Exception;
 
-class Database extends \PHPUnit_Framework_TestCase {
+class Db extends \PHPUnit_Framework_TestCase {
 
     public function testConnect() {
 

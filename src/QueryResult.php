@@ -50,6 +50,13 @@ class QueryResult {
      * @var mixed
      */
     private $raw_data = null;
+
+    /**
+     * Result's data
+     * 
+     * @var array
+     */
+    private $data = null;
     
     /**
      * Handler from Database class
@@ -149,6 +156,8 @@ class QueryResult {
      * @return  array
      */
     public function getData() {
+
+        if ( !is_null($this->data) ) return $this->data;
         
         $result = array();
         
@@ -157,19 +166,27 @@ class QueryResult {
         switch ($this->model) {
 
             case ("MYSQLI"):
-                
+
                 switch ($this->fetch) {
                     case 'NUM':     $fetch = MYSQLI_NUM;    break;
                     case 'ASSOC':   $fetch = MYSQLI_ASSOC;  break;
                     default:        $fetch = MYSQLI_BOTH;   break;
                 }
                 
-                while( $iterator < $this->raw_data->num_rows ) {
+                if ( is_bool($this->raw_data) ) {
+
+                    $result = null;
+
+                } else {
+
+                    while( $iterator < $this->raw_data->num_rows ) {
                     
-                    $result[$iterator] = $this->raw_data->fetch_array($fetch);
-                    
-                    $iterator++;
-                    
+                        $result[$iterator] = $this->raw_data->fetch_array($fetch);
+                        
+                        $iterator++;
+                        
+                    }
+
                 }
 
                 //if ( is_object($this->raw_data) ) $this->raw_data->free();
@@ -251,6 +268,9 @@ class QueryResult {
 
         }
         
+        // current data to buffer;
+        $this->data = $result;
+
         return $result;
         
     }
@@ -274,9 +294,11 @@ class QueryResult {
             case ("SQLITE_PDO"):
             case ("ORACLE_PDO"):
             case ("DBLIB_PDO"):
-                
-                $return = $this->raw_data->columnCount();
-                
+
+                if ( is_null($this->data) ) $this->getData();
+
+                $return = count($this->data);
+
                 break;
 
             case ("DB2"):
@@ -316,8 +338,8 @@ class QueryResult {
             case ("SQLITE_PDO"):
             case ("ORACLE_PDO"):
             case ("DBLIB_PDO"):
-                
-                $return = $this->raw_data->columnCount();
+
+                $return = $this->raw_data->rowCount();
                 
                 break;
 
@@ -399,13 +421,14 @@ class QueryResult {
 
             case ("POSTGRESQL"):
 
-                $return = pg_last_oid($this->raw_data);
+                //$return = pg_last_oid($this->raw_data);
+                $return = self::postgresqlLastInsertId($this->handler);
 
                 break;
 
         }
 
-        return $return;
+        return intval($return);
         
     }
     
@@ -486,8 +509,8 @@ class QueryResult {
         switch ($model) {
 
             case ("MYSQLI"):
-                
-                $return = ( $data instanceof \mysqli_result );
+
+                $return = ( $data instanceof \mysqli_result  OR is_bool($data) );
                 
                 break;
 
@@ -577,6 +600,28 @@ class QueryResult {
         }
 
         return is_null($id[0]['id']) ? null : intval($id[0]['id']);
+
+    }
+
+    /**
+     * Trik to enable last insert id for POSTGRESQL, since
+     * last_oid is no more supported
+     *
+     * @return  int
+     * 
+     * @throws  \Comodojo\Exception\DatabaseException
+     */
+    static private function postgresqlLastInsertId($handler) {
+
+        $query = "SELECT lastval()";
+
+        $response = pg_query($handler,$query);
+
+        if (!$response) throw new DatabaseException(pg_last_error());
+            
+        $id = pg_fetch_all($response);
+
+        return is_null($id[0]['lastval']) ? null : intval($id[0]['lastval']);
 
     }
     
