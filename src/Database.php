@@ -450,7 +450,7 @@ class Database {
             
             case ("POSTGRESQL"):
                 
-                if ($this->dbh !== false) pg_close($this->dbh);
+                if ($this->dbh !== false) @pg_close($this->dbh);
                 
                 $this->dbh = null;
                 
