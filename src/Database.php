@@ -152,6 +152,83 @@ class Database {
     }
 
     /**
+     * Get defined host
+     *
+     * @return string
+     */
+    final public function getHost() {
+
+        return $this->host;
+
+    }
+
+    /**
+     * Get defined port
+     *
+     * @return int
+     */
+    final public function getPort() {
+
+        return $this->port;
+
+    }
+
+    /**
+     * Get defined name
+     *
+     * @return string
+     */
+    final public function getName() {
+
+        return $this->name;
+
+    }
+
+    /**
+     * Get defined user
+     *
+     * @return string
+     */
+    final public function getUser() {
+
+        return $this->user;
+
+    }
+
+    /**
+     * Get defined pass
+     *
+     * @return string
+     */
+    final public function getPass() {
+
+        return $this->pass;
+
+    }
+
+    /**
+     * Get defined fetch
+     *
+     * @return string
+     */
+    final public function getFetch() {
+
+        return $this->fetch;
+
+    }
+
+    /**
+     * Get defined model
+     *
+     * @return string
+     */
+    final public function getModel() {
+
+        return $this->model;
+
+    }
+
+    /**
      * Set fetch mode
      *
      * @param   string  $mode   Fetch mode (ASSOC, NUM, BOTH)
