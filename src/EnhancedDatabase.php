@@ -263,7 +263,7 @@ class EnhancedDatabase extends Database {
      *
      * Two notation can be mixed to obtain a complex expression:
      *
-     *        - $this->keys('CONCAT::id::, ::position=>foo') become CONCAT(id,', ',position) AS foos
+     *        - $this->keys('CONCAT::id::, ::position=>foo') become CONCAT(id,', ',position) AS foo
      *
      * @param   mixed   $keys
      *
@@ -1146,7 +1146,7 @@ class EnhancedDatabase extends Database {
 
             unset($operation_array[0]);
 
-            array_walk($operation_array, function(&$value, $index) {
+            array_walk($operation_array, function(&$value, $index) use ($key_pattern) {
 
                 $value = $value == '*' ? $value : sprintf($key_pattern, $value);
 
