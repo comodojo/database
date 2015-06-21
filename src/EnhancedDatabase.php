@@ -16,7 +16,7 @@ use \Exception;
  * It extends the base class 'Database' with a cross-database query builder.
  * 
  * @package     Comodojo Spare Parts
- * @author      Marco Giovinazzi <info@comodojo.org>
+ * @author      Marco Giovinazzi <marco.giovinazzi@comodojo.org>
  * @license     MIT
  *
  * LICENSE:
