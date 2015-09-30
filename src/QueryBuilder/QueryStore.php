@@ -83,13 +83,13 @@ class QueryStore {
 
     public function getQuery() {
 
-        if ( is_null($this->table) OR empty($this->values) ) throw new DatabaseException('Invalid parameters for database->store', 1002);
+        if ( is_null($this->table) || empty($this->values) ) throw new DatabaseException('Invalid parameters for database->store', 1002);
 
         if ( sizeof($this->values_array) == 1 ) {
 
             $query_pattern = "INSERT INTO %s%s VALUES %s";
 
-            $keys = ( $this->keys == "*" OR is_null($this->keys) ) ? null : "(".$this->keys.")";
+            $keys = ( $this->keys == "*" || is_null($this->keys) ) ? null : "(".$this->keys.")";
 
             $query = sprintf($query_pattern, $this->table, " ".$keys, $this->values);
 
@@ -108,7 +108,7 @@ class QueryStore {
 
                     $query_pattern = "INSERT INTO %s%s VALUES%s";
 
-                    $keys = ( $this->keys == "*" OR is_null($this->keys) ) ? null : "(".$this->keys.")";
+                    $keys = ( $this->keys == "*" || is_null($this->keys) ) ? null : "(".$this->keys.")";
 
                     $query = sprintf($query_pattern, $this->table, " ".$keys, " ".$this->values);
 
@@ -128,7 +128,7 @@ class QueryStore {
 
                     $query_pattern = "INSERT INTO %s %s SELECT %s UNION SELECT %s";
 
-                    if ( $this->keys == "*" OR is_null($this->keys) ) throw new DatabaseException('SQLite require expllicit keys definition in multiple insert statement');
+                    if ( $this->keys == "*" || is_null($this->keys) ) throw new DatabaseException('SQLite require expllicit keys definition in multiple insert statement');
 
                     $keys = "(".$this->keys.")";
 
@@ -148,7 +148,7 @@ class QueryStore {
 
                     $query_pattern = "INSERT INTO %s%s SELECT %s";
 
-                    $keys = ( $this->keys == "*" OR is_null($this->keys) ) ? null : "(".$this->keys.")";
+                    $keys = ( $this->keys == "*" || is_null($this->keys) ) ? null : "(".$this->keys.")";
 
                     array_walk($this->values_array, function(&$value, $key) {
 

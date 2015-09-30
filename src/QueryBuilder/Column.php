@@ -140,7 +140,6 @@ class Column {
     static private $column_patterns = array(
 
         "MYSQL"      => "`%s` %s%s%s%s %s%s%s%s%s",
-        //"POSTGRESQL" => "%s %s%s%s%s %s%s%s%s%s",
         "POSTGRESQL" => "%s %s%s%s%s %s%s%s%s",
         "ORACLE"     => "%s %s%s%s%s %s%s%s%s%s",
         "DB2"        => "%s %s%s%s%s %s%s%s%s%s",
@@ -159,7 +158,7 @@ class Column {
 
         if ( empty($name) ) throw new DatabaseException("Invalid column's name");
 
-        if ( empty($type) OR !in_array($type, self::$supported_column_types) ) throw new DatabaseException("Invalid column's type");
+        if ( empty($type) || !in_array($type, self::$supported_column_types) ) throw new DatabaseException("Invalid column's type");
 
         $this->name = $name;
 
@@ -313,7 +312,7 @@ class Column {
 
     }
 
-    static public function create($name, $type) {
+    public static function create($name, $type) {
 
         try {
 
@@ -368,7 +367,6 @@ class Column {
 
         $length = is_null($this->length) ? null : "(".intval($this->length).")";
 
-        //$attr_1 = is_null($this->unsigned) ? (is_null($this->charset) ? null : $this->charset) : ' UNSIGNED';
         $attr_1 = is_null($this->charset) ? null : $this->charset;
 
         $attr_2 = is_null($this->zerofill) ? (is_null($this->collate) ? null : $this->collate) : ' ZEROFILL';
@@ -377,8 +375,6 @@ class Column {
 
         $defaultValue = is_null($this->defaultValue) ? null : ' DEFAULT '.$this->defaultValue;
 
-        //$autoincrement = is_null($this->autoincrement) ? null : ' AUTO_INCREMENT';
-                
         $unique = is_null($this->unique) ? null : ' UNIQUE';
 
         $primaryKey = is_null($this->primaryKey) ? null : ' PRIMARY KEY';
@@ -393,7 +389,6 @@ class Column {
             $attr_2,
             $notNull,
             $defaultValue,
-            //$autoincrement,
             $unique,
             $primaryKey
         );

@@ -91,12 +91,12 @@ class Database {
      *
      * It validate database parameters and try to establish a connection
      *
-     * @param   string  $model  Database data model
-     * @param   string  $host   Host to connect to
-     * @param   int     $port   Database port
-     * @param   string  $name   Database name
-     * @param   string  $user   User name
-     * @param   string  $pass   User password
+     * @param   string      $model  Database data model
+     * @param   string      $host   Host to connect to
+     * @param   int         $port   Database port
+     * @param   string      $name   Database name
+     * @param   string      $user   User name
+     * @param   string|null $pass   User password
      */
     final public function __construct($model, $host, $port, $name, $user, $pass=null) {
 
@@ -329,6 +329,12 @@ class Database {
 
                 if (!$response) throw new DatabaseException(pg_last_error());
 
+                break;
+                
+            default:
+                
+                throw new DatabaseException('Invalid database model');
+                
                 break;
 
         }

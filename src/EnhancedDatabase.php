@@ -133,7 +133,7 @@ class EnhancedDatabase extends Database {
     /**
      * Columns definition for create table method
      *
-     * @var string
+     * @var array
      */
     private $columns = array();
 
@@ -217,7 +217,7 @@ class EnhancedDatabase extends Database {
     /**
      * Set the database tables' prefix
      *
-     * @param   string  $table
+     * @param   string  $prefix
      *
      * @return  \Comodojo\Database\EnhancedDatabase
      */
@@ -313,12 +313,12 @@ class EnhancedDatabase extends Database {
      */
     public function values($values) {
 
-        $processed_values = array();
+        if ( empty($values) ) throw new DatabaseException('Invalid value/s');
 
+        $processed_values = array();
+        
         try {
             
-            //if ( empty($values) ) throw new DatabaseException('Invalid value/s');
-
             if ( is_array($values) ) foreach ($values as $value) array_push($processed_values, $this->composeValue($value));
 
             else array_push($processed_values, $this->composeValue($values));
@@ -456,7 +456,7 @@ class EnhancedDatabase extends Database {
 
         $join_type_list = Array('INNER','NATURAL','CROSS','LEFT','RIGHT','LEFT OUTER','RIGHT OUTER','FULL OUTER',null);
 
-        if ( !in_array($join, $join_type_list) OR empty($table) ) throw new DatabaseException('Invalid parameters for database join');
+        if ( !in_array($join, $join_type_list) || empty($table) ) throw new DatabaseException('Invalid parameters for database join');
 
         if ( is_null($as) ) {
 
@@ -631,7 +631,7 @@ class EnhancedDatabase extends Database {
 
             for ( $i=0; $i < sizeof($columns)-1; $i++ ) {
                 
-                if ( is_array($directions) AND @isset($directions[$i]) AND @in_array(strtoupper($directions[$i]), $supported_directions) ) $direction = ' '.strtoupper($direction[$i]);
+                if ( is_array($directions) && @isset($directions[$i]) && @in_array(strtoupper($directions[$i]), $supported_directions) ) $direction = ' '.strtoupper($direction[$i]);
 
                 else $direction = '';
 
@@ -730,7 +730,7 @@ class EnhancedDatabase extends Database {
     /**
      * Add a column in columns' list 
      *
-     * @param   mixed $having_clauses
+     * @param   \Comodojo\Database\QueryBuilder\Column $column
      *
      * @return  \Comodojo\Database\EnhancedDatabase
      */
@@ -762,7 +762,7 @@ class EnhancedDatabase extends Database {
                 "offset" =>  $offset
             ));
 
-            $result = $return_raw == false ? $this->query($query) : $this->rawQuery($query);
+            $result = $return_raw === false ? $this->query($query) : $this->rawQuery($query);
 
         } catch (DatabaseException $de) {
             
@@ -789,7 +789,7 @@ class EnhancedDatabase extends Database {
             
             $query = $this->buildQuery('STORE');
 
-            $result = $return_raw == false ? $this->query($query) : $this->rawQuery($query);
+            $result = $return_raw === false ? $this->query($query) : $this->rawQuery($query);
 
         } catch (DatabaseException $de) {
             
@@ -816,7 +816,7 @@ class EnhancedDatabase extends Database {
             
             $query = $this->buildQuery('UPDATE');
 
-            $result = $return_raw == false ? $this->query($query) : $this->rawQuery($query);
+            $result = $return_raw === false ? $this->query($query) : $this->rawQuery($query);
 
         } catch (DatabaseException $de) {
             
@@ -843,7 +843,7 @@ class EnhancedDatabase extends Database {
             
             $query = $this->buildQuery('DELETE');
 
-            $result = $return_raw == false ? $this->query($query) : $this->rawQuery($query);
+            $result = $return_raw === false ? $this->query($query) : $this->rawQuery($query);
 
         } catch (DatabaseException $de) {
             
@@ -870,7 +870,7 @@ class EnhancedDatabase extends Database {
             
             $query = $this->buildQuery('TRUNCATE');
 
-            $result = $return_raw == false ? $this->query($query) : $this->rawQuery($query);
+            $result = $return_raw === false ? $this->query($query) : $this->rawQuery($query);
 
         } catch (DatabaseException $de) {
             
@@ -885,10 +885,11 @@ class EnhancedDatabase extends Database {
     /**
      * Perform a CREATE query
      *
-     * @param   string  $name
-     * @param   bool    $if_not_exists
-     * @param   string  $engine
-     * @param   bool    $return_raw
+     * @param   bool        $if_not_exists
+     * @param   string|null $engine
+     * @param   string|null $charset
+     * @param   string|null $collate
+     * @param   bool        $return_raw
      *
      * @return  mixed
      *
@@ -896,19 +897,16 @@ class EnhancedDatabase extends Database {
      */
     public function create($if_not_exists=false, $engine=null, $charset=null, $collate=null, $return_raw=false) {
 
-        //if ( empty($name) ) throw new DatabaseException("Invalid or empty table name");
-        
         try {
             
             $query = $this->buildQuery('CREATE', array(
-                //"name"          =>  $name,
                 "if_not_exists" =>  $if_not_exists,
                 "engine"        =>  $engine,
                 "charset"       =>  $charset,
                 "collate"       =>  $collate
             ));
 
-            $result = $return_raw == false ? $this->query($query) : $this->rawQuery($query);
+            $result = $return_raw === false ? $this->query($query) : $this->rawQuery($query);
 
         } catch (DatabaseException $de) {
             
@@ -938,7 +936,7 @@ class EnhancedDatabase extends Database {
                 "if_exists" =>  $if_exists
             ));
 
-            $result = $return_raw == false ? $this->query($query) : $this->rawQuery($query);
+            $result = $return_raw === false ? $this->query($query) : $this->rawQuery($query);
 
         } catch (DatabaseException $de) {
             
@@ -953,13 +951,13 @@ class EnhancedDatabase extends Database {
     /**
      * Perform a query
      *
-     * @param   stirng  $query
+     * @param   string  $query
      *
      * @return  mixed
      *
      * @throws  \Comodojo\Exception\DatabaseException
      */
-    public function query($query, $return_raw=false) {
+    public function query($query) {
 
         $query = str_replace("*_DBPREFIX_*", $this->table_prefix, $query);
 
@@ -991,7 +989,7 @@ class EnhancedDatabase extends Database {
      *
      * @param bool $deep
      *
-     * @return array
+     * @return \Comodojo\Database\EnhancedDatabase
      */
     public function clean($deep=false) {
         
@@ -1040,23 +1038,13 @@ class EnhancedDatabase extends Database {
      *
      * @param  string  $dateString
      *
-     * @return array
+     * @return string
      */
     public function convertDate($dateString) {
 
         $dateReal = strtotime($dateString);
 
-        switch ($this->dbDataModel) {
-
-            case 'MYSQLI':
-            case 'MYSQL_PDO':
-            case 'DBLIB_PDO':
-            case 'POSTGRESQL':
-            case 'DB2':
-                
-                $dateObject = date("Y-m-d", $dateReal);
-
-                break;
+        switch ($this->model) {
 
             case 'ORACLE_PDO':
 
@@ -1067,6 +1055,17 @@ class EnhancedDatabase extends Database {
             case 'SQLITE_PDO':
 
                 $dateObject = date("c", $dateReal);
+
+                break;
+                
+            case 'MYSQLI':
+            case 'MYSQL_PDO':
+            case 'DBLIB_PDO':
+            case 'POSTGRESQL':
+            case 'DB2':
+            default:
+                
+                $dateObject = date("Y-m-d", $dateReal);
 
                 break;
 
@@ -1081,7 +1080,7 @@ class EnhancedDatabase extends Database {
      *
      * @param  string  $timeString
      *
-     * @return array
+     * @return string
      */
     public function convertTime($timeString) {
 
@@ -1170,8 +1169,6 @@ class EnhancedDatabase extends Database {
      * @throws  \Comodojo\Exception\DatabaseException
      */
     private function composeValue($value) {
-
-        //if ( empty($value) ) throw new DatabaseException('Invalid value',1014);
 
         $value_string_pattern = "'%s'";
 
@@ -1277,7 +1274,7 @@ class EnhancedDatabase extends Database {
 
             if ( !in_array($operator, Array('AND','OR')) ) throw new DatabaseException('Invalid syntax for a where clause');
             
-            if ( sizeof($column) != 3 OR sizeof($value) != 3 ) throw new DatabaseException('Invalid syntax for a where clause');
+            if ( sizeof($column) != 3 || sizeof($value) != 3 ) throw new DatabaseException('Invalid syntax for a where clause');
 
             try {
 
@@ -1294,7 +1291,7 @@ class EnhancedDatabase extends Database {
 
             $to_return = sprintf($clause_pattern, $processed_column, $operator, $processed_value);
 
-        } elseif ( is_scalar($column) AND is_array($value) ) {
+        } elseif ( is_scalar($column) && is_array($value) ) {
 
             switch($operator) {
 
@@ -1380,20 +1377,20 @@ class EnhancedDatabase extends Database {
 
             }
 
-        } elseif ( is_scalar($column) AND ( is_scalar($value) OR is_null($value) ) ) {
+        } elseif ( is_scalar($column) && ( is_scalar($value) || is_null($value) ) ) {
             
             $clause_pattern = in_array($this->model, Array('MYSQLI','MYSQL_PDO')) ? "`%s` %s %s" : "%s %s %s";
 
-            if ($operator == 'IS' OR $operator == 'IS NOT' OR $operator == 'ISNOT' ) {
+            if ($operator == 'IS' || $operator == 'IS NOT' || $operator == 'ISNOT' ) {
 
                 $processed_column = $column;
 
                 $processed_operator = $operator == 'IS' ? $operator : 'IS NOT';
 
-                $processed_value = ( is_null($value) OR $value == 'NULL' ) ? 'NULL' : 'NOT NULL';
+                $processed_value = ( is_null($value) || $value == 'NULL' ) ? 'NULL' : 'NOT NULL';
 
             }
-            elseif ( $operator == 'LIKE' OR $operator == 'NOT LIKE' OR $operator == 'NOTLIKE' ) {
+            elseif ( $operator == 'LIKE' || $operator == 'NOT LIKE' || $operator == 'NOTLIKE' ) {
 
                 $processed_column = $column;
 
@@ -1570,7 +1567,6 @@ class EnhancedDatabase extends Database {
 
                     $builder = new QueryCreate($this->model);
 
-                    //if ( array_key_exists('name', $parameters) ) $builder->name($parameters['name']);
                     if ( array_key_exists('if_not_exists', $parameters) ) $builder->ifNotExists($parameters['if_not_exists']);
                     if ( array_key_exists('engine', $parameters) ) $builder->engine($parameters['engine']);
                     if ( array_key_exists('charset', $parameters) ) $builder->charset($parameters['charset']);

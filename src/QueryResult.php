@@ -24,27 +24,6 @@ use \Exception;
 class QueryResult {
     
     /**
-     * Transaction id (if any)
-     * 
-     * @var integer
-     */
-    private $id = null;
-
-    /**
-     * Affected rows
-     * 
-     * @var integer
-     */
-    private $rows = null;
-
-    /**
-     * Length of result
-     * 
-     * @var integer
-     */
-    private $length = null;
-    
-    /**
      * Result's raw data
      * 
      * @var mixed
@@ -82,8 +61,6 @@ class QueryResult {
     /**
      * Build a result set
      *
-     * @return   \Comodojo\Database\QueryResult
-     * 
      * @throws   \Comodojo\Exception\DatabaseException
      */
     public function __construct($handler, $model, $fetch, $data) {
@@ -482,13 +459,13 @@ class QueryResult {
      *
      * @param   Object  $data
      *
-     * @return  Object  \Comodojo\Database\QueryResult
+     * @return  \Comodojo\Database\QueryResult
      * 
      * @throws  \Comodojo\Exception\DatabaseException
      */
     private function setRawData($data) {
         
-        if ( self::checkRawData($data,$this->model) == false ) throw new DatabaseException("Invalid result statement for selected model");
+        if ( self::checkRawData($data,$this->model) === false ) throw new DatabaseException("Invalid result statement for selected model");
         
         $this->raw_data = $data;
         
@@ -504,13 +481,13 @@ class QueryResult {
      *
      * @return  bool
      */
-    static private function checkRawData($data, $model) {
+    private static function checkRawData($data, $model) {
     
         switch ($model) {
 
             case ("MYSQLI"):
 
-                $return = ( $data instanceof \mysqli_result  OR is_bool($data) );
+                $return = ( $data instanceof \mysqli_result  || is_bool($data) );
                 
                 break;
 
@@ -525,13 +502,13 @@ class QueryResult {
 
             case ("DB2"):
 
-                $return = ( is_resource($data) AND @get_resource_type($data) == "DB2 Statement" );
+                $return = ( is_resource($data) && @get_resource_type($data) == "DB2 Statement" );
                 
                 break;
 
             case ("POSTGRESQL"):
 
-                $return = ( is_resource($data) AND @get_resource_type($data) == "pgsql result" );
+                $return = ( is_resource($data) && @get_resource_type($data) == "pgsql result" );
                 
                 break;
 
@@ -549,7 +526,7 @@ class QueryResult {
      * 
      * @throws  \Comodojo\Exception\DatabaseException
      */
-    static private function dblibLastInsertId($handler) {
+    private static function dblibLastInsertId($handler) {
 
         $query = "SELECT SCOPE_IDENTITY() as id";
 
@@ -580,7 +557,7 @@ class QueryResult {
      * 
      * @throws  \Comodojo\Exception\DatabaseException
      */
-    static private function oracleLastInsertId($handler) {
+    private static function oracleLastInsertId($handler) {
 
         $query = "SELECT id.currval as id from dual";
 
@@ -611,7 +588,7 @@ class QueryResult {
      * 
      * @throws  \Comodojo\Exception\DatabaseException
      */
-    static private function postgresqlLastInsertId($handler) {
+    private static function postgresqlLastInsertId($handler) {
 
         $query = "SELECT lastval()";
 
