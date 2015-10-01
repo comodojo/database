@@ -89,7 +89,7 @@ class QueryStore {
 
             $query_pattern = "INSERT INTO %s%s VALUES %s";
 
-            $keys = ( $this->keys == "*" || is_null($this->keys) ) ? null : "(".$this->keys.")";
+            $keys = ($this->keys == "*" || is_null($this->keys)) ? null : "(".$this->keys.")";
 
             $query = sprintf($query_pattern, $this->table, " ".$keys, $this->values);
 
@@ -97,7 +97,7 @@ class QueryStore {
 
         else {
 
-            switch ($this->model) {
+            switch ( $this->model ) {
 
 
                 case ("MYSQLI"):
@@ -108,7 +108,7 @@ class QueryStore {
 
                     $query_pattern = "INSERT INTO %s%s VALUES%s";
 
-                    $keys = ( $this->keys == "*" || is_null($this->keys) ) ? null : "(".$this->keys.")";
+                    $keys = ($this->keys == "*" || is_null($this->keys)) ? null : "(".$this->keys.")";
 
                     $query = sprintf($query_pattern, $this->table, " ".$keys, " ".$this->values);
 
@@ -134,13 +134,13 @@ class QueryStore {
 
                     $select = array();
 
-                    foreach ($this->keys_array as $position => $key) array_push($select, $this->values_array[0][$position]." AS ".$key);
+                    foreach ( $this->keys_array as $position => $key ) array_push($select, $this->values_array[0][$position]." AS ".$key);
 
                     $union_select = array();
 
-                    foreach (array_slice($this->values_array, 1) as $values) array_push($union_select, implode(", ",$values));
+                    foreach ( array_slice($this->values_array, 1) as $values ) array_push($union_select, implode(", ", $values));
 
-                    $query = sprintf($query_pattern, $this->table, $keys, implode(", ",$select), implode(" UNION SELECT ",$union_select));
+                    $query = sprintf($query_pattern, $this->table, $keys, implode(", ", $select), implode(" UNION SELECT ", $union_select));
 
                     break;
                     
@@ -148,7 +148,7 @@ class QueryStore {
 
                     $query_pattern = "INSERT INTO %s%s SELECT %s";
 
-                    $keys = ( $this->keys == "*" || is_null($this->keys) ) ? null : "(".$this->keys.")";
+                    $keys = ($this->keys == "*" || is_null($this->keys)) ? null : "(".$this->keys.")";
 
                     array_walk($this->values_array, function(&$value, $key) {
 

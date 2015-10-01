@@ -140,14 +140,14 @@ class QueryResult {
         
         $iterator = 0;
 
-        switch ($this->model) {
+        switch ( $this->model ) {
 
             case ("MYSQLI"):
 
-                switch ($this->fetch) {
-                    case 'NUM':     $fetch = MYSQLI_NUM;    break;
-                    case 'ASSOC':   $fetch = MYSQLI_ASSOC;  break;
-                    default:        $fetch = MYSQLI_BOTH;   break;
+                switch ( $this->fetch ) {
+                    case 'NUM':     $fetch = MYSQLI_NUM; break;
+                    case 'ASSOC':   $fetch = MYSQLI_ASSOC; break;
+                    default:        $fetch = MYSQLI_BOTH; break;
                 }
                 
                 if ( is_bool($this->raw_data) ) {
@@ -156,7 +156,7 @@ class QueryResult {
 
                 } else {
 
-                    while( $iterator < $this->raw_data->num_rows ) {
+                    while ( $iterator < $this->raw_data->num_rows ) {
                     
                         $result[$iterator] = $this->raw_data->fetch_array($fetch);
                         
@@ -175,10 +175,10 @@ class QueryResult {
             case ("ORACLE_PDO"):
             case ("DBLIB_PDO"):
             
-                switch ($this->fetch) {
-                    case 'NUM':     $fetch = \PDO::FETCH_NUM;    break;
-                    case 'ASSOC':   $fetch = \PDO::FETCH_ASSOC;  break;
-                    default:        $fetch = \PDO::FETCH_BOTH;   break;
+                switch ( $this->fetch ) {
+                    case 'NUM':     $fetch = \PDO::FETCH_NUM; break;
+                    case 'ASSOC':   $fetch = \PDO::FETCH_ASSOC; break;
+                    default:        $fetch = \PDO::FETCH_BOTH; break;
                 }
 
                 $result = $this->raw_data->fetchAll($fetch);
@@ -187,7 +187,7 @@ class QueryResult {
             
             case ("DB2"):
 
-                switch ($this->fetch) {
+                switch ( $this->fetch ) {
                     
                     case 'NUM':
                         
@@ -213,9 +213,9 @@ class QueryResult {
 
             case ("POSTGRESQL"):
 
-                while( $iterator < pg_num_rows($this->raw_data) ) {
+                while ( $iterator < pg_num_rows($this->raw_data) ) {
                     
-                    switch ($this->fetch) {
+                    switch ( $this->fetch ) {
                         
                         case 'NUM':
                             
@@ -259,7 +259,7 @@ class QueryResult {
      */
     public function getLength() {
         
-        switch ($this->model) {
+        switch ( $this->model ) {
 
             case ("MYSQLI"):
                 
@@ -303,7 +303,7 @@ class QueryResult {
      */
     public function getAffectedRows() {
         
-        switch ($this->model) {
+        switch ( $this->model ) {
 
             case ("MYSQLI"):
                 
@@ -347,7 +347,7 @@ class QueryResult {
      */
     public function getInsertId() {
         
-        switch ($this->model) {
+        switch ( $this->model ) {
 
             case ("MYSQLI"):
                 
@@ -465,7 +465,7 @@ class QueryResult {
      */
     private function setRawData($data) {
         
-        if ( self::checkRawData($data,$this->model) === false ) throw new DatabaseException("Invalid result statement for selected model");
+        if ( self::checkRawData($data, $this->model) === false ) throw new DatabaseException("Invalid result statement for selected model");
         
         $this->raw_data = $data;
         
@@ -483,11 +483,11 @@ class QueryResult {
      */
     private static function checkRawData($data, $model) {
     
-        switch ($model) {
+        switch ( $model ) {
 
             case ("MYSQLI"):
 
-                $return = ( $data instanceof \mysqli_result  || is_bool($data) );
+                $return = ($data instanceof \mysqli_result || is_bool($data));
                 
                 break;
 
@@ -496,19 +496,19 @@ class QueryResult {
             case ("ORACLE_PDO"):
             case ("DBLIB_PDO"):
                 
-                $return = ( $data instanceof \PDOStatement );
+                $return = ($data instanceof \PDOStatement);
                 
                 break;
 
             case ("DB2"):
 
-                $return = ( is_resource($data) && @get_resource_type($data) == "DB2 Statement" );
+                $return = (is_resource($data) && @get_resource_type($data) == "DB2 Statement");
                 
                 break;
 
             case ("POSTGRESQL"):
 
-                $return = ( is_resource($data) && @get_resource_type($data) == "pgsql result" );
+                $return = (is_resource($data) && @get_resource_type($data) == "pgsql result");
                 
                 break;
 
@@ -541,7 +541,7 @@ class QueryResult {
         }
         catch (\PDOException $e) {
 
-            throw new DatabaseException($e->getMessage(), (int)$e->getCode());
+            throw new DatabaseException($e->getMessage(), (int) $e->getCode());
 
         }
 
@@ -572,7 +572,7 @@ class QueryResult {
         }
         catch (\PDOException $e) {
 
-            throw new DatabaseException($e->getMessage(), (int)$e->getCode());
+            throw new DatabaseException($e->getMessage(), (int) $e->getCode());
 
         }
 
@@ -592,9 +592,9 @@ class QueryResult {
 
         $query = "SELECT lastval()";
 
-        $response = pg_query($handler,$query);
+        $response = pg_query($handler, $query);
 
-        if (!$response) throw new DatabaseException(pg_last_error());
+        if ( !$response ) throw new DatabaseException(pg_last_error());
             
         $id = pg_fetch_all($response);
 

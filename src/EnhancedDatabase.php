@@ -149,7 +149,7 @@ class EnhancedDatabase extends Database {
      *
      * @var array
      */
-    static private $supported_query_types = array('GET','STORE','UPDATE','DELETE','TRUNCATE','CREATE','DROP'/*,'ALTER'*/);
+    static private $supported_query_types = array('GET', 'STORE', 'UPDATE', 'DELETE', 'TRUNCATE', 'CREATE', 'DROP'/*,'ALTER'*/);
 
     /**
      * If $mode == true, builder will reset itself after each build
@@ -158,7 +158,7 @@ class EnhancedDatabase extends Database {
      *
      * @return  \Comodojo\Database\EnhancedDatabase
      */
-    final public function autoClean($mode=true) {
+    final public function autoClean($mode = true) {
 
         $this->auto_clean = filter_var($mode, FILTER_VALIDATE_BOOLEAN);
 
@@ -173,7 +173,7 @@ class EnhancedDatabase extends Database {
      *
      * @throws  \Comodojo\Exception\DatabaseException
      */
-    public function getQuery($query, $parameters=array()) {
+    public function getQuery($query, $parameters = array()) {
 
         try {
             
@@ -202,13 +202,13 @@ class EnhancedDatabase extends Database {
      */
     public function table($table) {
 
-        $table_pattern = in_array($this->model, Array('MYSQLI','MYSQL_PDO')) ? "`*_DBPREFIX_*%s`" : "*_DBPREFIX_*%s";
+        $table_pattern = in_array($this->model, Array('MYSQLI', 'MYSQL_PDO')) ? "`*_DBPREFIX_*%s`" : "*_DBPREFIX_*%s";
 
         if ( empty($table) ) throw new DatabaseException('Invalid table name');
 
-        else if ( is_null($this->table) ) $this->table = sprintf($table_pattern,trim($table));
+        else if ( is_null($this->table) ) $this->table = sprintf($table_pattern, trim($table));
 
-        else $this->table .= ", ".sprintf($table_pattern,trim($table));
+        else $this->table .= ", ".sprintf($table_pattern, trim($table));
 
         return $this;
 
@@ -236,7 +236,7 @@ class EnhancedDatabase extends Database {
      *
      * @return  \Comodojo\Database\EnhancedDatabase
      */
-    final public function distinct($value=true) {
+    final public function distinct($value = true) {
 
         $this->distinct = filter_var($value, FILTER_VALIDATE_BOOLEAN);
 
@@ -279,7 +279,7 @@ class EnhancedDatabase extends Database {
             
             if ( empty($keys) ) throw new DatabaseException('Invalid key/s');
 
-            else if ( is_array($keys) ) foreach ($keys as $key) array_push($processed_keys, $this->composeKey($key));
+            else if ( is_array($keys) ) foreach ( $keys as $key ) array_push($processed_keys, $this->composeKey($key));
 
             else array_push($processed_keys, $this->composeKey($keys));
 
@@ -319,7 +319,7 @@ class EnhancedDatabase extends Database {
         
         try {
             
-            if ( is_array($values) ) foreach ($values as $value) array_push($processed_values, $this->composeValue($value));
+            if ( is_array($values) ) foreach ( $values as $value ) array_push($processed_values, $this->composeValue($value));
 
             else array_push($processed_values, $this->composeValue($values));
 
@@ -369,8 +369,7 @@ class EnhancedDatabase extends Database {
 
             $this->where = "WHERE ".$this->composeWhereCondition($column, $operator, $value);
 
-        }
-        catch (DatabaseException $de) {
+        } catch (DatabaseException $de) {
 
             throw $de;
 
@@ -397,8 +396,7 @@ class EnhancedDatabase extends Database {
 
             $this->where .= " AND ".$this->composeWhereCondition($column, $operator, $value);
 
-        }
-        catch (DatabaseException $de) {
+        } catch (DatabaseException $de) {
 
             throw $de;
 
@@ -425,8 +423,7 @@ class EnhancedDatabase extends Database {
 
             $this->where .= " OR ".$this->composeWhereCondition($column, $operator, $value);
 
-        }
-        catch (DatabaseException $de) {
+        } catch (DatabaseException $de) {
 
             throw $de;
 
@@ -450,11 +447,11 @@ class EnhancedDatabase extends Database {
      *
      * @throws  \Comodojo\Exception\DatabaseException
      */
-    public function join($join_type, $table, $as=null) {
+    public function join($join_type, $table, $as = null) {
         
         $join = strtoupper($join_type);
 
-        $join_type_list = Array('INNER','NATURAL','CROSS','LEFT','RIGHT','LEFT OUTER','RIGHT OUTER','FULL OUTER',null);
+        $join_type_list = Array('INNER', 'NATURAL', 'CROSS', 'LEFT', 'RIGHT', 'LEFT OUTER', 'RIGHT OUTER', 'FULL OUTER', null);
 
         if ( !in_array($join, $join_type_list) || empty($table) ) throw new DatabaseException('Invalid parameters for database join');
 
@@ -495,7 +492,7 @@ class EnhancedDatabase extends Database {
 
         $using_pattern = "USING (%s)";
 
-        if (empty($columns)) throw new DatabaseException('Invalid parameters for database::using');
+        if ( empty($columns) ) throw new DatabaseException('Invalid parameters for database::using');
         
         $this->using = sprintf($using_pattern, is_array($columns) ? implode(',', $columns) : $columns);
         
@@ -520,8 +517,7 @@ class EnhancedDatabase extends Database {
 
             $this->on = "ON ".$this->composeOnClause($first_column, $operator, $second_column);
 
-        }
-        catch (DatabaseException $de) {
+        } catch (DatabaseException $de) {
 
             throw $de;
 
@@ -548,8 +544,7 @@ class EnhancedDatabase extends Database {
 
             $this->on .= " AND ".$this->composeOnClause($first_column, $operator, $second_column);
 
-        }
-        catch (DatabaseException $de) {
+        } catch (DatabaseException $de) {
 
             throw $de;
 
@@ -576,8 +571,7 @@ class EnhancedDatabase extends Database {
 
             $this->on .= " OR ".$this->composeOnClause($first_column, $operator, $second_column);
 
-        }
-        catch (DatabaseException $de) {
+        } catch (DatabaseException $de) {
 
             throw $de;
 
@@ -597,13 +591,13 @@ class EnhancedDatabase extends Database {
      *
      * @throws  \Comodojo\Exception\DatabaseException
      */
-    public function orderBy($columns, $directions=null) {
+    public function orderBy($columns, $directions = null) {
 
         if ( empty($columns) ) throw new DatabaseException('Invalid order by column');
 
         $supported_directions = array("DESC", "ASC");
 
-        switch ($this->model) {
+        switch ( $this->model ) {
             
             case ("SQLITE_PDO"):
 
@@ -629,7 +623,7 @@ class EnhancedDatabase extends Database {
 
             $column = array();
 
-            for ( $i=0; $i < sizeof($columns)-1; $i++ ) {
+            for ( $i = 0; $i < sizeof($columns) - 1; $i++ ) {
                 
                 if ( is_array($directions) && @isset($directions[$i]) && @in_array(strtoupper($directions[$i]), $supported_directions) ) $direction = ' '.strtoupper($direction[$i]);
 
@@ -680,8 +674,7 @@ class EnhancedDatabase extends Database {
 
             $this->group_by = "GROUP BY ".implode(',', $columns);
 
-        }
-        else {
+        } else {
 
             $column = trim($columns);
 
@@ -720,8 +713,7 @@ class EnhancedDatabase extends Database {
 
             $this->having = "HAVING ".implode(' AND ', $having_clauses);
 
-        }
-        else $this->having = "HAVING ".sprintf($having_column_pattern, trim($having_clauses));
+        } else $this->having = "HAVING ".sprintf($having_column_pattern, trim($having_clauses));
 
         return $this;
 
@@ -753,7 +745,7 @@ class EnhancedDatabase extends Database {
      *
      * @throws  \Comodojo\Exception\DatabaseException
      */
-    public function get($limit=0, $offset=0, $return_raw=false) {
+    public function get($limit = 0, $offset = 0, $return_raw = false) {
 
         try {
             
@@ -783,7 +775,7 @@ class EnhancedDatabase extends Database {
      *
      * @throws  \Comodojo\Exception\DatabaseException
      */
-    public function store($return_raw=false) {
+    public function store($return_raw = false) {
 
         try {
             
@@ -810,7 +802,7 @@ class EnhancedDatabase extends Database {
      *
      * @throws  \Comodojo\Exception\DatabaseException
      */
-    public function update($return_raw=false) {
+    public function update($return_raw = false) {
 
         try {
             
@@ -837,7 +829,7 @@ class EnhancedDatabase extends Database {
      *
      * @throws  \Comodojo\Exception\DatabaseException
      */
-    public function delete($return_raw=false) {
+    public function delete($return_raw = false) {
 
         try {
             
@@ -864,7 +856,7 @@ class EnhancedDatabase extends Database {
      *
      * @throws  \Comodojo\Exception\DatabaseException
      */
-    public function truncate($return_raw=false) {
+    public function truncate($return_raw = false) {
 
         try {
             
@@ -895,7 +887,7 @@ class EnhancedDatabase extends Database {
      *
      * @throws  \Comodojo\Exception\DatabaseException
      */
-    public function create($if_not_exists=false, $engine=null, $charset=null, $collate=null, $return_raw=false) {
+    public function create($if_not_exists = false, $engine = null, $charset = null, $collate = null, $return_raw = false) {
 
         try {
             
@@ -928,7 +920,7 @@ class EnhancedDatabase extends Database {
      *
      * @throws  \Comodojo\Exception\DatabaseException
      */
-    public function drop($if_exists=false, $return_raw=false) {
+    public function drop($if_exists = false, $return_raw = false) {
 
         try {
             
@@ -953,7 +945,7 @@ class EnhancedDatabase extends Database {
      *
      * @param   string  $query
      *
-     * @return  mixed
+     * @return  QueryResult
      *
      * @throws  \Comodojo\Exception\DatabaseException
      */
@@ -968,7 +960,7 @@ class EnhancedDatabase extends Database {
     /**
      * Perform a query and return raw results
      *
-     * @param   stirng  $query
+     * @param   string  $query
      *
      * @return  mixed
      *
@@ -991,7 +983,7 @@ class EnhancedDatabase extends Database {
      *
      * @return \Comodojo\Database\EnhancedDatabase
      */
-    public function clean($deep=false) {
+    public function clean($deep = false) {
         
         $this->table = null;
 
@@ -1044,7 +1036,7 @@ class EnhancedDatabase extends Database {
 
         $dateReal = strtotime($dateString);
 
-        switch ($this->model) {
+        switch ( $this->model ) {
 
             case 'ORACLE_PDO':
 
@@ -1084,7 +1076,7 @@ class EnhancedDatabase extends Database {
      */
     public function convertTime($timeString) {
 
-        return ltrim($timeString,'T');
+        return ltrim($timeString, 'T');
         
     }
 
@@ -1099,7 +1091,7 @@ class EnhancedDatabase extends Database {
      */
     private function composeKey($key) {
 
-        $key_pattern = in_array($this->model, Array('MYSQLI','MYSQL_PDO')) ? "`%s`" : "%s";
+        $key_pattern = in_array($this->model, Array('MYSQLI', 'MYSQL_PDO')) ? "`%s`" : "%s";
 
         if ( !is_scalar($key) ) throw new DatabaseException("Invalid key");
         
@@ -1176,9 +1168,9 @@ class EnhancedDatabase extends Database {
 
         $processed_value = null;
 
-        if  ( is_bool($value) === true ) {
+        if ( is_bool($value) === true ) {
 
-            switch ($this->model) {
+            switch ( $this->model ) {
 
                 case 'MYSQLI':
                 case 'MYSQL_PDO':
@@ -1200,15 +1192,13 @@ class EnhancedDatabase extends Database {
 
             }
 
-        }
-
-        elseif ( is_numeric($value) ) $processed_value = $value;
+        } elseif ( is_numeric($value) ) $processed_value = $value;
 
         elseif ( is_null($value) ) $processed_value = $value_null_pattern;
 
         else {
 
-            switch ($this->model) {
+            switch ( $this->model ) {
                 
                 case 'MYSQLI':
 
@@ -1272,18 +1262,17 @@ class EnhancedDatabase extends Database {
 
             $clause_pattern = "(%s %s %s)";
 
-            if ( !in_array($operator, Array('AND','OR')) ) throw new DatabaseException('Invalid syntax for a where clause');
+            if ( !in_array($operator, Array('AND', 'OR')) ) throw new DatabaseException('Invalid syntax for a where clause');
             
             if ( sizeof($column) != 3 || sizeof($value) != 3 ) throw new DatabaseException('Invalid syntax for a where clause');
 
             try {
 
-                $processed_column = $this->composeWhereCondition($column[0],$column[1],$column[2]);
+                $processed_column = $this->composeWhereCondition($column[0], $column[1], $column[2]);
 
-                $processed_value = $this->composeWhereCondition($value[0],$value[1],$value[2]);
+                $processed_value = $this->composeWhereCondition($value[0], $value[1], $value[2]);
 
-            }
-            catch (DatabaseException $e) {
+            } catch (DatabaseException $e) {
 
                 throw $e;
 
@@ -1293,17 +1282,17 @@ class EnhancedDatabase extends Database {
 
         } elseif ( is_scalar($column) && is_array($value) ) {
 
-            switch($operator) {
+            switch ( $operator ) {
 
                 case 'IN':
 
-                    $clause_pattern = in_array($this->model, Array('MYSQLI','MYSQL_PDO')) ? "`%s` IN (%s)" : "%s IN (%s)";
+                    $clause_pattern = in_array($this->model, Array('MYSQLI', 'MYSQL_PDO')) ? "`%s` IN (%s)" : "%s IN (%s)";
 
                     array_walk($value, function(&$keyvalue, $key) {
 
-                        if  ( is_bool($keyvalue) === true ) {
+                        if ( is_bool($keyvalue) === true ) {
 
-                            switch ($this->model) {
+                            switch ( $this->model ) {
 
                                 case 'MYSQLI':
                                 case 'MYSQL_PDO':
@@ -1325,9 +1314,7 @@ class EnhancedDatabase extends Database {
 
                             }
 
-                        }
-
-                        elseif ( is_numeric($keyvalue) ) $keyvalue = $keyvalue;
+                        } elseif ( is_numeric($keyvalue) ) $keyvalue = $keyvalue;
 
                         elseif ( is_null($keyvalue) ) $keyvalue = "NULL";
 
@@ -1343,7 +1330,7 @@ class EnhancedDatabase extends Database {
 
                 case 'BETWEEN':
 
-                    $clause_pattern = in_array($this->model, Array('MYSQLI','MYSQL_PDO')) ? "`%s` BETWEEN %s AND %s" : "%s BETWEEN %s AND %s";
+                    $clause_pattern = in_array($this->model, Array('MYSQLI', 'MYSQL_PDO')) ? "`%s` BETWEEN %s AND %s" : "%s BETWEEN %s AND %s";
 
                     $to_return = sprintf($clause_pattern, $column, intval($value[0]), intval($value[1]));
 
@@ -1352,7 +1339,7 @@ class EnhancedDatabase extends Database {
                 case 'NOT IN':
                 case 'NOTIN':
 
-                    $clause_pattern = in_array($this->model, Array('MYSQLI','MYSQL_PDO')) ? "`%s` NOT IN (%s)" : "%s NOT IN (%s)";
+                    $clause_pattern = in_array($this->model, Array('MYSQLI', 'MYSQL_PDO')) ? "`%s` NOT IN (%s)" : "%s NOT IN (%s)";
 
                     $processed_value = "'".implode("','", $value)."'";
 
@@ -1363,7 +1350,7 @@ class EnhancedDatabase extends Database {
                 case 'NOT BETWEEN':
                 case 'NOTBETWEEN':
 
-                    $clause_pattern = in_array($this->model, Array('MYSQLI','MYSQL_PDO')) ? "`%s` NOT BETWEEN %s AND %s" : "%s NOT BETWEEN %s AND %s";
+                    $clause_pattern = in_array($this->model, Array('MYSQLI', 'MYSQL_PDO')) ? "`%s` NOT BETWEEN %s AND %s" : "%s NOT BETWEEN %s AND %s";
 
                     $to_return = sprintf($clause_pattern, $column, intval($value[0]), intval($value[1]));
 
@@ -1377,20 +1364,19 @@ class EnhancedDatabase extends Database {
 
             }
 
-        } elseif ( is_scalar($column) && ( is_scalar($value) || is_null($value) ) ) {
+        } elseif ( is_scalar($column) && (is_scalar($value) || is_null($value)) ) {
             
-            $clause_pattern = in_array($this->model, Array('MYSQLI','MYSQL_PDO')) ? "`%s` %s %s" : "%s %s %s";
+            $clause_pattern = in_array($this->model, Array('MYSQLI', 'MYSQL_PDO')) ? "`%s` %s %s" : "%s %s %s";
 
-            if ($operator == 'IS' || $operator == 'IS NOT' || $operator == 'ISNOT' ) {
+            if ( $operator == 'IS' || $operator == 'IS NOT' || $operator == 'ISNOT' ) {
 
                 $processed_column = $column;
 
                 $processed_operator = $operator == 'IS' ? $operator : 'IS NOT';
 
-                $processed_value = ( is_null($value) || $value == 'NULL' ) ? 'NULL' : 'NOT NULL';
+                $processed_value = (is_null($value) || $value == 'NULL') ? 'NULL' : 'NOT NULL';
 
-            }
-            elseif ( $operator == 'LIKE' || $operator == 'NOT LIKE' || $operator == 'NOTLIKE' ) {
+            } elseif ( $operator == 'LIKE' || $operator == 'NOT LIKE' || $operator == 'NOTLIKE' ) {
 
                 $processed_column = $column;
 
@@ -1398,16 +1384,15 @@ class EnhancedDatabase extends Database {
 
                 $processed_value = "'".$value."'";
 
-            }
-            else {
+            } else {
 
                 $processed_column = $column;
 
                 $processed_operator = $operator;
 
-                if  ( is_bool($value) === true ) {
+                if ( is_bool($value) === true ) {
 
-                    switch ($this->model) {
+                    switch ( $this->model ) {
 
                         case 'MYSQLI':
                         case 'MYSQL_PDO':
@@ -1429,9 +1414,7 @@ class EnhancedDatabase extends Database {
 
                     }
 
-                }
-
-                elseif ( is_numeric($value) ) $processed_value = $value;
+                } elseif ( is_numeric($value) ) $processed_value = $value;
 
                 elseif ( is_null($value) ) $processed_value = "NULL";
 
@@ -1441,9 +1424,7 @@ class EnhancedDatabase extends Database {
 
             $to_return = sprintf($clause_pattern, $processed_column, $processed_operator, $processed_value);            
 
-        }
-        
-        else throw new DatabaseException('Invalid syntax for a where clause');
+        } else throw new DatabaseException('Invalid syntax for a where clause');
 
         return $to_return;
 
@@ -1462,7 +1443,7 @@ class EnhancedDatabase extends Database {
      */
     private function composeOnClause($first_column, $operator, $second_column) {
 
-        $valid_operators = Array('=','!=','>','>=','<','<=','<>');
+        $valid_operators = Array('=', '!=', '>', '>=', '<', '<=', '<>');
 
         $on_pattern = "%s%s%s";
 
@@ -1492,7 +1473,7 @@ class EnhancedDatabase extends Database {
         
         try {
         
-            switch ($query) {
+            switch ( $query ) {
 
                 case 'GET':
                     
