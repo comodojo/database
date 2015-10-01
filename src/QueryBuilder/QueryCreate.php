@@ -35,6 +35,9 @@ class QueryCreate {
 
     private $columns = array();
 
+    /**
+     * @param string $model
+     */
     public function __construct($model) {
 
         $this->model = $model;
@@ -73,6 +76,9 @@ class QueryCreate {
     
     }
     
+    /**
+     * @param string $data
+     */
     final public function table($data) {
     
         $this->name = $data;
