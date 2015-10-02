@@ -178,10 +178,8 @@ class Edb extends \PHPUnit_Framework_TestCase {
 
         $data = $result->getData();
 
-        $this->assertEquals("ARTHUR", $data[0]['firstname']);
-
-        $this->assertEquals("FORD", $data[1]['firstname']);
-
+        $this->assertSame(5, $result->getLength());
+        
         $result = $this->db->tablePrefix('test_')
             ->table('starships')
             ->keys(array('speed','COUNT::id=>count'))
