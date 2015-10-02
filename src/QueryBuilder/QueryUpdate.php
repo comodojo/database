@@ -73,7 +73,7 @@ class QueryUpdate {
 
     public function getQuery() {
 
-        if ( is_null($this->table) OR empty($this->keys_array) OR empty($this->values_array) ) throw new DatabaseException('Invalid parameters for database->update', 1024);
+        if ( is_null($this->table) || empty($this->keys_array) || empty($this->values_array) ) throw new DatabaseException('Invalid parameters for database->update', 1024);
 
         if ( sizeof($this->values_array) != 1 ) throw new DatabaseException('Cannot update multiple values at a time');
 

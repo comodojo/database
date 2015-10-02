@@ -33,6 +33,8 @@ class QueryCreate {
 
     private $name = null;
 
+    private $collate = null;
+
     private $columns = array();
 
     /**
@@ -97,7 +99,7 @@ class QueryCreate {
 
     public function getQuery() {
         
-        if ( is_null($this->name) OR empty($this->columns)) throw new DatabaseException('Invalid parameters for database->create',1027);
+        if ( is_null($this->name) || empty($this->columns)) throw new DatabaseException('Invalid parameters for database->create',1027);
 
         $if_not_exists = is_null($this->if_not_exists) ? null : " IF NOT EXISTS";
 

@@ -99,7 +99,6 @@ class QueryStore {
 
             switch ( $this->model ) {
 
-
                 case ("MYSQLI"):
                 case ("MYSQL_PDO"):
                 case ("DB2"):

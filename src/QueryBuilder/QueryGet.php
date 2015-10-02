@@ -155,7 +155,7 @@ class QueryGet {
 
     public function getQuery() {
 
-        if ( is_null($this->table) OR is_null($this->keys) ) throw new DatabaseException('Invalid parameters for database->get', 1004);
+        if ( is_null($this->table) || is_null($this->keys) ) throw new DatabaseException('Invalid parameters for database->get', 1004);
 
         $select = $this->distinct ? "SELECT DISTINCT" : "SELECT";
 

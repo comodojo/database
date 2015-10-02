@@ -625,7 +625,7 @@ class EnhancedDatabase extends Database {
 
             for ( $i = 0; $i < sizeof($columns) - 1; $i++ ) {
                 
-                if ( is_array($directions) && @isset($directions[$i]) && @in_array(strtoupper($directions[$i]), $supported_directions) ) $direction = ' '.strtoupper($direction[$i]);
+                if ( is_array($directions) && @isset($directions[$i]) && @in_array(strtoupper($directions[$i]), $supported_directions) ) $direction = ' '.strtoupper($directions[$i]);
 
                 else $direction = '';
 
@@ -666,7 +666,7 @@ class EnhancedDatabase extends Database {
 
         elseif ( is_array($columns) ) {
 
-            array_walk($columns, function(&$column, $key) {
+            array_walk($columns, function(&$column, $key) use($group_column_pattern) {
 
                 $column = sprintf($group_column_pattern, trim($column));
 
@@ -705,7 +705,7 @@ class EnhancedDatabase extends Database {
 
         elseif ( is_array($having_clauses) ) {
 
-            array_walk($having_clauses, function(&$column, $key) {
+            array_walk($having_clauses, function(&$column, $key) use($having_column_pattern) {
 
                 $column = sprintf($having_column_pattern, trim($column));
 
@@ -1258,7 +1258,7 @@ class EnhancedDatabase extends Database {
 
         $operator = strtoupper($operator);
 
-        if ( is_array($column) AND is_array($value) ) {
+        if ( is_array($column) && is_array($value) ) {
 
             $clause_pattern = "(%s %s %s)";
 

@@ -379,7 +379,7 @@ class Column {
 
         $primaryKey = is_null($this->primaryKey) ? null : ' PRIMARY KEY';
 
-        if ( $this->autoincrement == true AND $this->unsigned == true ) $serial = true;
+        if ( $this->autoincrement === true && $this->unsigned === true ) $serial = true;
 
         return sprintf(self::$column_patterns['POSTGRESQL'],
             $this->name,
