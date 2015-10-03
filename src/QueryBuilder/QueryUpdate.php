@@ -77,17 +77,17 @@ class QueryUpdate {
 
         if ( sizeof($this->values_array) != 1 ) throw new DatabaseException('Cannot update multiple values at a time');
 
-        if ( sizeof($this->keys_array) != sizeof($this->values_array[0]) ) throw new DatabaseException('Keys and values are of different sizes',1025);
+        if ( sizeof($this->keys_array) != sizeof($this->values_array[0]) ) throw new DatabaseException('Keys and values are of different sizes', 1025);
 
         $query_pattern = "UPDATE %s SET %s%s";
 
         $query_content_array = array();
 
-        foreach ($this->keys_array as $position => $key) array_push($query_content_array, $key.'='.$this->values_array[0][$position]);
+        foreach ( $this->keys_array as $position => $key ) array_push($query_content_array, $key.'='.$this->values_array[0][$position]);
 
         $where = is_null($this->where) ? null : " ".$this->where;
 
-        $query = sprintf($query_pattern, $this->table, implode(',',$query_content_array), $where);
+        $query = sprintf($query_pattern, $this->table, implode(',', $query_content_array), $where);
 
         return $query;
 

@@ -99,7 +99,7 @@ class QueryCreate {
 
     public function getQuery() {
         
-        if ( is_null($this->name) || empty($this->columns)) throw new DatabaseException('Invalid parameters for database->create',1027);
+        if ( is_null($this->name) || empty($this->columns) ) throw new DatabaseException('Invalid parameters for database->create', 1027);
 
         $if_not_exists = is_null($this->if_not_exists) ? null : " IF NOT EXISTS";
 
@@ -109,7 +109,7 @@ class QueryCreate {
         
         $collate = is_null($this->collate) ? null : ' COLLATE='.$this->collate;
 
-        switch ($this->model) {
+        switch ( $this->model ) {
 
             case 'MYSQLI':
             case 'MYSQL_PDO':
@@ -122,7 +122,7 @@ class QueryCreate {
 
                 // $query = sprintf($query_pattern, $if_not_exists, $table, implode(', ',$this->columns), $engine);
 
-                $query = sprintf($query_pattern, $if_not_exists, $this->name, implode(', ',$this->columns), $engine, $charset, $collate);
+                $query = sprintf($query_pattern, $if_not_exists, $this->name, implode(', ', $this->columns), $engine, $charset, $collate);
 
                 break;
 
@@ -141,7 +141,7 @@ class QueryCreate {
 
                 // $query = sprintf($query_pattern, $if_not_exists, $table, implode(', ',$this->columns));
 
-                $query = sprintf($query_pattern, $if_not_exists, $this->name, implode(', ',$this->columns));
+                $query = sprintf($query_pattern, $if_not_exists, $this->name, implode(', ', $this->columns));
 
                 break;
         

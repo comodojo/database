@@ -70,7 +70,7 @@ class Database {
      * 
      * @var array
      */
-    private $supported_models = Array("MYSQLI","MYSQL_PDO","ORACLE_PDO","SQLITE_PDO","DBLIB_PDO","DB2","POSTGRESQL");
+    private $supported_models = Array("MYSQLI", "MYSQL_PDO", "ORACLE_PDO", "SQLITE_PDO", "DBLIB_PDO", "DB2", "POSTGRESQL");
 
     /**
      * Database Handler
@@ -98,7 +98,7 @@ class Database {
      * @param   string      $user   User name
      * @param   string|null $pass   User password
      */
-    final public function __construct($model, $host, $port, $name, $user, $pass=null) {
+    final public function __construct($model, $host, $port, $name, $user, $pass = null) {
 
         $this->model = in_array(strtoupper($model), $this->supported_models) ? strtoupper($model) : null;
         
@@ -116,11 +116,11 @@ class Database {
         
         $this->user = is_string($user) ? $user : null;
 
-        if ( empty($this->model)   ) throw new DatabaseException('Invalid database model');
-        if ( empty($this->host)    ) throw new DatabaseException('Invalid database host');
-        if ( $this->port == false  ) throw new DatabaseException('Invalid database port');
-        if ( empty($this->name)    ) throw new DatabaseException('Invalid database name');
-        if ( empty($this->user)    ) throw new DatabaseException('Invalid database user');
+        if ( empty($this->model) ) throw new DatabaseException('Invalid database model');
+        if ( empty($this->host) ) throw new DatabaseException('Invalid database host');
+        if ( $this->port == false ) throw new DatabaseException('Invalid database port');
+        if ( empty($this->name) ) throw new DatabaseException('Invalid database name');
+        if ( empty($this->user) ) throw new DatabaseException('Invalid database user');
 
         $this->pass = is_string($pass) ? $pass : null;
 
@@ -237,12 +237,11 @@ class Database {
      */
     public function fetch($mode) {
 
-        if ( in_array(strtoupper($mode), Array('ASSOC','NUM','BOTH')) ) {
+        if ( in_array(strtoupper($mode), Array('ASSOC', 'NUM', 'BOTH')) ) {
 
             $this->fetch = strtoupper($mode);
 
-        }
-        else throw new DatabaseException('Invalid data fetch method');
+        } else throw new DatabaseException('Invalid data fetch method');
 
         return $this;
 
@@ -286,13 +285,13 @@ class Database {
      */
     public function rawQuery($query) {
         
-        switch ($this->model) {
+        switch ( $this->model ) {
 
             case ("MYSQLI"):
                 
                 $response = $this->dbh->query($query);
 
-                if (!$response) throw new DatabaseException($this->dbh->error, $this->dbh->errno);
+                if ( !$response ) throw new DatabaseException($this->dbh->error, $this->dbh->errno);
 
                 break;
 
@@ -306,10 +305,9 @@ class Database {
                     $response = $this->dbh->prepare($query);
                     $response->execute();
 
-                }
-                catch (\PDOException $e) {
+                } catch (\PDOException $e) {
 
-                    throw new DatabaseException($e->getMessage(), (int)$e->getCode());
+                    throw new DatabaseException($e->getMessage(), (int) $e->getCode());
 
                 }
 
@@ -317,17 +315,17 @@ class Database {
 
             case ("DB2"):
 
-                $response = db2_exec($this->dbh,$query);
+                $response = db2_exec($this->dbh, $query);
 
-                if (!$response)  throw new DatabaseException(db2_stmt_error());
+                if ( !$response )  throw new DatabaseException(db2_stmt_error());
                 
                 break;
 
             case ("POSTGRESQL"):
 
-                $response = pg_query($this->dbh,$query);
+                $response = pg_query($this->dbh, $query);
 
-                if (!$response) throw new DatabaseException(pg_last_error());
+                if ( !$response ) throw new DatabaseException(pg_last_error());
 
                 break;
                 
@@ -377,7 +375,7 @@ class Database {
      */
     private function connect() {
 
-        switch ($this->model) {
+        switch ( $this->model ) {
 
             case ("MYSQLI"):
                 
@@ -385,7 +383,7 @@ class Database {
 
                 $this->dbh = new \mysqli($this->host, $this->user, $this->pass, $this->name, $this->port);
 
-                if ($this->dbh->connect_error) throw new DatabaseException($this->dbh->connect_error, $this->dbh->connect_errno);
+                if ( $this->dbh->connect_error ) throw new DatabaseException($this->dbh->connect_error, $this->dbh->connect_errno);
 
                 break;
 
@@ -393,14 +391,13 @@ class Database {
 
                 if ( !in_array('mysql', \PDO::getAvailableDrivers()) ) throw new DatabaseException('Unsupported database model - '.$this->model);
 
-                $dsn="mysql:host=".$this->host.";port=".$this->port .";dbname=".$this->name;
+                $dsn = "mysql:host=".$this->host.";port=".$this->port.";dbname=".$this->name;
                 
                 try {
 
                     $this->dbh = new \PDO($dsn, $this->user, $this->pass, array(\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION));
 
-                }
-                catch (\PDOException $e) {
+                } catch (\PDOException $e) {
                     
                     throw new DatabaseException($e->getMessage(), $e->getCode());
                     
@@ -412,14 +409,13 @@ class Database {
 
                 if ( !in_array('oci', \PDO::getAvailableDrivers()) ) throw new DatabaseException('Unsupported database model - '.$this->model);
 
-                $dsn="oci:dbname=".$this->host.":".$this->port."/".$this->name;
+                $dsn = "oci:dbname=".$this->host.":".$this->port."/".$this->name;
                 
                 try {
                     
                     $this->dbh = new \PDO($dsn, $this->user, $this->pass, array(\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION));
                     
-                }
-                catch (\PDOException $e) {
+                } catch (\PDOException $e) {
                     
                     throw new DatabaseException($e->getMessage(), $e->getCode());
                     
@@ -431,14 +427,13 @@ class Database {
             
                 if ( !in_array('sqlite', \PDO::getAvailableDrivers()) ) throw new DatabaseException('Unsupported database model - '.$this->model);
 
-                $dsn="sqlite:".$this->name;
+                $dsn = "sqlite:".$this->name;
 
                 try {
                     
                     $this->dbh = new \PDO($dsn, $this->user, $this->pass, array(\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION));
                     
-                }
-                catch (\PDOException $e) {
+                } catch (\PDOException $e) {
                     
                     throw new DatabaseException($e->getMessage(), $e->getCode());
                     
@@ -453,9 +448,9 @@ class Database {
                 $dsn  = "ibm:DRIVER={IBM DB2 ODBC DRIVER};DATABASE=".$this->name;
                 $dsn .= ";HOSTNAME=".$this->host.";PORT=".$this->port.";PROTOCOL=TCPIP;UID=".$this->user.";PWD=".$this->pass.";";
 
-                $this->dbh = db2_pconnect($dsn,$this->user,$this->pass);
+                $this->dbh = db2_pconnect($dsn, $this->user, $this->pass);
                 
-                if (!$this->dbh){
+                if ( !$this->dbh ) {
                     
                     throw new DatabaseException(db2_conn_errormsg());
                     
@@ -473,8 +468,7 @@ class Database {
                     
                     $this->dbh = new \PDO($dsn, $this->user, $this->pass, array(\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION));
                     
-                }
-                catch (\PDOException $e) {
+                } catch (\PDOException $e) {
                     
                     throw new DatabaseException($e->getMessage(), $e->getCode());
                     
@@ -490,7 +484,7 @@ class Database {
 
                 $this->dbh = @pg_connect($dsn);
                 
-                if ($this->dbh == false) {
+                if ( $this->dbh == false ) {
                     
                     throw new DatabaseException(pg_last_error());
                     
@@ -508,11 +502,11 @@ class Database {
      */
     private function disconnect() {
 
-        switch($this->model) {
+        switch ( $this->model ) {
             
             case ("MYSQLI"):
                 
-                if ($this->dbh !== false) $this->dbh->close();
+                if ( $this->dbh !== false ) $this->dbh->close();
                 
                 break;
             
@@ -527,13 +521,13 @@ class Database {
             
             case ("DB2"):
                 
-                if ($this->dbh !== false) db2_close($this->dbh);
+                if ( $this->dbh !== false ) db2_close($this->dbh);
                 
                 break;
             
             case ("POSTGRESQL"):
                 
-                if ($this->dbh !== false) @pg_close($this->dbh);
+                if ( $this->dbh !== false ) @pg_close($this->dbh);
                 
                 $this->dbh = null;
                 

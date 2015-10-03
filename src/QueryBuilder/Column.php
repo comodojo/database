@@ -47,7 +47,7 @@ class Column {
 
     private $primaryKey = null;
 
-    static private $supported_column_types = array('STRING','INTEGER','FLOAT','DECIMAL','BOOL','TIME','DATE','DATETIME','TIMESTAMP','TEXT','BLOB');
+    static private $supported_column_types = array('STRING', 'INTEGER', 'FLOAT', 'DECIMAL', 'BOOL', 'TIME', 'DATE', 'DATETIME', 'TIMESTAMP', 'TEXT', 'BLOB');
 
     static private $supported_column_conversions = array(
 
@@ -258,9 +258,12 @@ class Column {
 
     }
 
+    /**
+     * @param string $model
+     */
     final public function getColumnDefinition($model) {
 
-        switch ($model) {
+        switch ( $model ) {
 
             case ("MYSQL"):
             case ("MYSQLI"):
