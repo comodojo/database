@@ -10,13 +10,13 @@ This library provides a standardized layer to connect and send queries to differ
 
 Currently it supports:
 
-- MySQL 4.1 and above via **mysqli**
-- MySQL 3.x, 4.x and 5.x databases using **PDO_MYSQL**
-- Oracle through the OCI library and **PDO_OCI**
-- SQLite 3 using **PDO_OCI**
-- PostgreSQL through **pgsql** extension
-- Microsoft SQL Server and Sybase using **PDO_DBLIB**
-- IBM DB2 Universal Database, IBM Cloudscape, and Apache Derby through **ibm_db2** extension
+- MySQL 4.1 and above via [mysqli](http://php.net/manual/en/book.mysqli.php)
+- MySQL 3.x, 4.x and 5.x databases using [PDO_MYSQL](http://php.net/manual/en/ref.pdo-mysql.php)
+- Oracle through the OCI library and [PDO_OCI](http://php.net/manual/en/ref.pdo-oci.php)
+- SQLite 3 using [PDO_SQLITE](http://php.net/manual/en/ref.pdo-sqlite.php)
+- PostgreSQL through [pgsql](http://php.net/manual/en/book.pgsql.php)
+- Microsoft SQL Server and Sybase using [PDO_DBLIB](http://php.net/manual/en/ref.pdo-dblib.php)
+- IBM DB2 Universal Database, IBM Cloudscape, and Apache Derby through [ibm_db2](http://php.net/manual/en/book.ibm-db2.php)
 
 It integrates a query builder (still in development) that helps creation of queries across different databases.
 
