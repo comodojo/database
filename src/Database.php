@@ -75,7 +75,7 @@ class Database {
     /**
      * Database Handler
      * 
-     * @var Object
+     * @var Object|Resource
      */
     protected $dbh = false;
 
@@ -233,7 +233,7 @@ class Database {
      *
      * @param   string  $mode   Fetch mode (ASSOC, NUM, BOTH)
      *
-     * @return  Object          $this
+     * @return  \Comodojo\Database\Database
      */
     public function fetch($mode) {
 
@@ -253,7 +253,7 @@ class Database {
      *
      * @param   string  $query
      *
-     * @return  Object  \Comodojo\Database\QueryResult
+     * @return  \Comodojo\Database\QueryResult
      * 
      * @throws  \Comodojo\Exception\DatabaseException
      */
@@ -350,7 +350,7 @@ class Database {
      *
      * - fetch mode to ASSOC
      *
-     * @return  Object  $this
+     * @return  \Comodojo\Database\Database
      */
     public function clean() {
 
@@ -363,7 +363,7 @@ class Database {
     /**
      * Get database handler
      *
-     * @return  Object
+     * @return  mixed
      */
     final public function getHandler() {
 
