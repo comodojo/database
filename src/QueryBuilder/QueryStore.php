@@ -35,12 +35,18 @@ class QueryStore {
 
     private $keys_array = array();
 
+    /**
+     * @param string $model
+     */
     public function __construct($model) {
 
         $this->model = $model;
 
     }
 
+    /**
+     * @param string $data
+     */
     final public function table($data) {
 
         $this->table = $data;
@@ -49,6 +55,9 @@ class QueryStore {
 
     }
 
+    /**
+     * @param string $data
+     */
     final public function values($data) {
 
         $this->values = $data;
@@ -57,6 +66,9 @@ class QueryStore {
 
     }
 
+    /**
+     * @param string $data
+     */
     final public function keys($data) {
 
         $this->keys = $data;
@@ -93,9 +105,7 @@ class QueryStore {
 
             $query = sprintf($query_pattern, $this->table, " ".$keys, $this->values);
 
-        }
-
-        else {
+        } else {
 
             switch ( $this->model ) {
 

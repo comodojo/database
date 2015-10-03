@@ -53,7 +53,7 @@ class QueryDelete {
 
     public function getQuery() {
         
-        if ( is_null($this->table) ) throw new DatabaseException('Invalid parameters for database->delete',1018);
+        if ( is_null($this->table) ) throw new DatabaseException('Invalid parameters for database->delete', 1018);
 
         $query_pattern = "DELETE FROM %s %s";
 

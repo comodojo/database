@@ -62,6 +62,8 @@ class QueryResult {
      * Build a result set
      *
      * @throws   \Comodojo\Exception\DatabaseException
+     * @param string $model
+     * @param string $fetch
      */
     public function __construct($handler, $model, $fetch, $data) {
         
@@ -414,7 +416,7 @@ class QueryResult {
      *
      * @param   Object  $handler
      *
-     * @return  Object  \Comodojo\Database\QueryResult
+     * @return  QueryResult  \Comodojo\Database\QueryResult
      */
     private function setHandler($handler) {
         
@@ -429,7 +431,7 @@ class QueryResult {
      *
      * @param   string  $model
      *
-     * @return  Object  \Comodojo\Database\QueryResult
+     * @return  QueryResult  \Comodojo\Database\QueryResult
      */
     private function setModel($model) {
         
@@ -444,7 +446,7 @@ class QueryResult {
      *
      * @param   string  $fetch
      *
-     * @return  Object  \Comodojo\Database\QueryResult
+     * @return  QueryResult  \Comodojo\Database\QueryResult
      */
     private function setFetch($fetch) {
         
@@ -538,8 +540,7 @@ class QueryResult {
             
             $id = $response->fetchAll(\PDO::FETCH_ASSOC);
 
-        }
-        catch (\PDOException $e) {
+        } catch (\PDOException $e) {
 
             throw new DatabaseException($e->getMessage(), (int) $e->getCode());
 
@@ -569,8 +570,7 @@ class QueryResult {
             
             $id = $response->fetchAll(\PDO::FETCH_ASSOC);
 
-        }
-        catch (\PDOException $e) {
+        } catch (\PDOException $e) {
 
             throw new DatabaseException($e->getMessage(), (int) $e->getCode());
 

@@ -53,11 +53,11 @@ class QueryDrop {
 
     public function getQuery() {
         
-        if ( is_null($this->table) ) throw new DatabaseException('Invalid parameters for database->drop',1023);
+        if ( is_null($this->table) ) throw new DatabaseException('Invalid parameters for database->drop', 1023);
         
         $query_pattern = "DROP TABLE %s%s";
 
-        if ( in_array($this->model, array("MYSQL","MYSQLI","MYSQL_PDO","POSTGRESQL","DBLIB_PDO","ORACLE_PDO","SQLITE_PDO")) ) $if_exists = is_null($this->if_exists) ? null : 'IF EXISTS ';
+        if ( in_array($this->model, array("MYSQL", "MYSQLI", "MYSQL_PDO", "POSTGRESQL", "DBLIB_PDO", "ORACLE_PDO", "SQLITE_PDO")) ) $if_exists = is_null($this->if_exists) ? null : 'IF EXISTS ';
 
         else $if_exists = null;
 

@@ -27,12 +27,18 @@ class QueryTruncate {
 
     private $table = null;
 
+    /**
+     * @param string $model
+     */
     public function __construct($model) {
 
         $this->model = $model;
 
     }
 
+    /**
+     * @param string $data
+     */
     final public function table($data) {
 
         $this->table = $data;
@@ -43,9 +49,9 @@ class QueryTruncate {
 
     public function getQuery() {
         
-        if ( is_null($this->table) ) throw new DatabaseException('Invalid parameters for database->empty',1016);
+        if ( is_null($this->table) ) throw new DatabaseException('Invalid parameters for database->empty', 1016);
 
-        switch ($this->model) {
+        switch ( $this->model ) {
 
             case ("MYSQLI"):
             case ("MYSQL_PDO"):
