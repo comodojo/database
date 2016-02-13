@@ -1,5 +1,6 @@
 <?php namespace Comodojo\Database\Results;
 
+use \Comodojo\Database\Database;
 use \mysqli_result;
 
 /**
@@ -98,9 +99,9 @@ class MySQLi extends AbstractQueryResult {
 
     private static function selectFetchMode($fetch_mode) {
 
-        if ( $fetch_mode == self::FETCH_NUM ) return MYSQLI_NUM;
+        if ( $fetch_mode == Database::FETCH_NUM ) return MYSQLI_NUM;
 
-        else if ( $fetch_mode == self::FETCH_ASSOC ) return MYSQLI_ASSOC;
+        else if ( $fetch_mode == Database::FETCH_ASSOC ) return MYSQLI_ASSOC;
 
         else return MYSQLI_BOTH;
 

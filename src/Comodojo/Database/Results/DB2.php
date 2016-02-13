@@ -1,5 +1,7 @@
 <?php namespace Comodojo\Database\Results;
 
+use \Comodojo\Database\Database;
+
 /**
  * Results object for DB2 model
  *
@@ -29,13 +31,13 @@ class DB2 extends AbstractQueryResult {
 
         switch ( $this->fetch_mode ) {
 
-            case self::FETCH_NUM:
+            case Database::FETCH_NUM:
 
                 while ( $row = db2_fetch_row($this->raw_data) ) array_push($result, $row);
 
                 break;
 
-            case self::FETCH_ASSOC:
+            case Database::FETCH_ASSOC:
 
                 while ( $row = db2_fetch_assoc($this->raw_data) ) array_push($result, $row);
 

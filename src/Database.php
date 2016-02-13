@@ -1,17 +1,19 @@
 <?php namespace Comodojo\Database;
 
+use \Comodojo\Database\Models\ModelInterface;
+use \Comodojo\Database\Results\QueryResultInterface;
 use \Comodojo\Exception\DatabaseException;
 use \Exception;
 
 /**
  * Database connect/query class for comodojo
- * 
+ *
  * @package     Comodojo Spare Parts
  * @author      Marco Giovinazzi <marco.giovinazzi@comodojo.org>
  * @license     MIT
  *
  * LICENSE:
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -24,117 +26,149 @@ use \Exception;
 class Database {
 
     /**
-     * Host to connect to
-     * 
-     * @var string
+     * Fetch data as numeric array
+     *
+     * @const string
      */
-    private $host = null;
+    const FETCH_NUM = "NUM";
 
     /**
-     * Database port
-     * 
-     * @var int
+     * Fetch data as associative array
+     *
+     * @const string
      */
-    private $port = null;
+    const FETCH_ASSOC = "ASSOC";
 
     /**
-     * Database name
-     * 
-     * @var string
+     * Fetch data as both numeric and associative array
+     *
+     * @const string
      */
-    private $name = null;
+    const FETCH_BOTH = "BOTH";
 
     /**
-     * User name
-     * 
-     * @var string
+     * Connect to database using MySQLi model
+     *
+     * @const string
      */
-    private $user = null;
+    const MODEL_MYSQLI = "MySQLi";
 
     /**
-     * User password
-     * 
-     * @var string
+     * Connect to database using MySQLPDO model
+     *
+     * @const string
      */
-    private $pass = null;
+    const MODEL_MYSQLPDO = "MySQLPDO";
+
+    /**
+     * Connect to database using OraclePDO model
+     *
+     * @const string
+     */
+    const MODEL_ORACLEPDO = "OraclePDO";
+
+    /**
+     * Connect to database using SQLitePDO model
+     *
+     * @const string
+     */
+    const MODEL_SQLITEPDO = "SQLitePDO";
+
+    /**
+     * Connect to database using SQLServerPDO model
+     *
+     * @const string
+     */
+    const MODEL_SQLSERVERPDO = "SQLServerPDO";
+
+    /**
+     * Connect to database using DB2 model
+     *
+     * @const string
+     */
+    const MODEL_DB2 = "DB2";
+
+    /**
+     * Connect to database using PostgreSQL model
+     *
+     * @const string
+     */
+    const MODEL_POSTGRESQL = "PostgreSQL";
 
     /**
      * Fetch mode (ASSOC, NUM, BOTH)
-     * 
+     *
      * @var string
      */
     private $fetch = "ASSOC";
 
     /**
-     * Supported database data model
-     * 
+     * Database Model
+     *
+     * @var ModelInterface
+     */
+    private $model;
+
+    /**
+     * Supported database models
+     *
      * @var array
      */
-    private $supported_models = Array("MYSQLI", "MYSQL_PDO", "ORACLE_PDO", "SQLITE_PDO", "DBLIB_PDO", "DB2", "POSTGRESQL");
-
-    /**
-     * Database Handler
-     * 
-     * @var Object|Resource
-     */
-    protected $dbh = false;
-
-    /**
-     * Database data model
-     * 
-     * @var string
-     */
-    protected $model = null;
+    private $supported_models = Array("MySQLi", "MySQLPDO", "OraclePDO", "SQLitePDO", "SQLServerPDO", "DB2", "PostgreSQL");
 
     /**
      * Constructor
      *
      * It validate database parameters and try to establish a connection
      *
-     * @param   string      $model  Database data model
-     * @param   string      $host   Host to connect to
-     * @param   int         $port   Database port
-     * @param   string      $name   Database name
-     * @param   string      $user   User name
-     * @param   string|null $pass   User password
+     * @param   string|ModelInterface   $model  Database data model
+     * @param   string                  $host   Host to connect to
+     * @param   int                     $port   Database port
+     * @param   string                  $name   Database name
+     * @param   string                  $user   User name
+     * @param   string                  $pass   User password
+     *
+     * @throws  DatabaseException
      */
-    final public function __construct($model, $host, $port, $name, $user, $pass = null) {
+    public function __construct($model, $host, $port, $name, $user, $pass = null) {
 
-        $this->model = in_array(strtoupper($model), $this->supported_models) ? strtoupper($model) : null;
-        
-        $this->host = is_null($host) ? null : $host;
-        
-        $this->port = filter_var($port, FILTER_VALIDATE_INT, array(
+        if ( $model instanceof ModelInterface ) {
+
+            $this->model = $model;
+
+        } else if ( in_array($model, $this->supported_models) ) {
+
+            $model_name = "\\Comodojo\\Database\\Models\\".$model;
+
+            $this->model = new $model_name;
+
+        } else {
+
+            throw new DatabaseException('Unknown database model; have you typed it correctly?');
+
+        }
+
+        if ( empty($host) ) throw new DatabaseException('Invalid database host');
+
+        if ( $port = filter_var($port, FILTER_VALIDATE_INT, array(
             "options" => array(
                 "min_range" => 1,
                 "max_range" => 65535
                 )
-            )
-        );
-        
-        $this->name = is_null($name) ? null : $name;
-        
-        $this->user = is_string($user) ? $user : null;
+            )) === false
+        ) throw new DatabaseException('Invalid database port');
 
-        if ( empty($this->model) ) throw new DatabaseException('Invalid database model');
-        if ( empty($this->host) ) throw new DatabaseException('Invalid database host');
-        if ( $this->port == false ) throw new DatabaseException('Invalid database port');
-        if ( empty($this->name) ) throw new DatabaseException('Invalid database name');
-        if ( empty($this->user) ) throw new DatabaseException('Invalid database user');
+        if ( empty($name) ) throw new DatabaseException('Invalid database name');
 
-        $this->pass = is_string($pass) ? $pass : null;
+        if ( empty($user) ) throw new DatabaseException('Invalid database user');
 
         try {
 
-            $this->connect();
+            $this->model->connect($host, $port, $name, $user, $pass);
 
         } catch (DatabaseException $ce) {
 
             throw $ce;
-
-        } catch (Exception $e) {
-
-            throw $e;
 
         }
 
@@ -145,64 +179,20 @@ class Database {
      *
      * Unset (disconnect) database handler
      */
-    final public function __destruct() {
+    public function __destruct() {
 
-        $this->disconnect();
-
-    }
-
-    /**
-     * Get defined host
-     *
-     * @return string
-     */
-    final public function getHost() {
-
-        return $this->host;
+        $this->model->disconnect();
 
     }
 
     /**
-     * Get defined port
+     * Get current Database Model
      *
-     * @return int
+     * @return ModelInterface
      */
-    final public function getPort() {
+    final public function model() {
 
-        return $this->port;
-
-    }
-
-    /**
-     * Get defined name
-     *
-     * @return string
-     */
-    final public function getName() {
-
-        return $this->name;
-
-    }
-
-    /**
-     * Get defined user
-     *
-     * @return string
-     */
-    final public function getUser() {
-
-        return $this->user;
-
-    }
-
-    /**
-     * Get defined pass
-     *
-     * @return string
-     */
-    final public function getPass() {
-
-        return $this->pass;
+        return $this->model;
 
     }
 
@@ -211,20 +201,9 @@ class Database {
      *
      * @return string
      */
-    final public function getFetch() {
+    final public function getFetchMode() {
 
         return $this->fetch;
-
-    }
-
-    /**
-     * Get defined model
-     *
-     * @return string
-     */
-    final public function getModel() {
-
-        return $this->model;
 
     }
 
@@ -233,112 +212,19 @@ class Database {
      *
      * @param   string  $mode   Fetch mode (ASSOC, NUM, BOTH)
      *
-     * @return  \Comodojo\Database\Database
+     * @return  Database
+     * @throws  DatabaseException
      */
-    public function fetch($mode) {
+    public function setFetchMode($mode) {
 
-        if ( in_array(strtoupper($mode), Array('ASSOC', 'NUM', 'BOTH')) ) {
+        if ( in_array( $fetch = strtoupper($mode), Array('ASSOC', 'NUM', 'BOTH')) ) {
 
-            $this->fetch = strtoupper($mode);
+            $this->fetch = $fetch;
 
         } else throw new DatabaseException('Invalid data fetch method');
 
         return $this;
 
-    }
-
-    /**
-     * Shot a query to database and build a result set (QueryResult object).
-     *
-     * @param   string  $query
-     *
-     * @return  \Comodojo\Database\QueryResult
-     * 
-     * @throws  \Comodojo\Exception\DatabaseException
-     */
-    public function query($query) {
-
-        try {
-
-            $result = $this->rawQuery($query);
-            
-            $return = new QueryResult($this->dbh, $this->model, $this->fetch, $result);
-
-        } catch (DatabaseException $e) {
-            
-            throw $e;
-
-        }
-        
-        return $return;
-
-    }
-    
-    /**
-     * Shot a query to database and return raw data
-     *
-     * @param   string  $query
-     *
-     * @return  mixed
-     * 
-     * @throws  \Comodojo\Exception\DatabaseException
-     */
-    public function rawQuery($query) {
-        
-        switch ( $this->model ) {
-
-            case ("MYSQLI"):
-                
-                $response = $this->dbh->query($query);
-
-                if ( !$response ) throw new DatabaseException($this->dbh->error, $this->dbh->errno);
-
-                break;
-
-            case ("MYSQL_PDO"):
-            case ("ORACLE_PDO"):
-            case ("SQLITE_PDO"):
-            case ("DBLIB_PDO"):
-
-                try {
-
-                    $response = $this->dbh->prepare($query);
-                    $response->execute();
-
-                } catch (\PDOException $e) {
-
-                    throw new DatabaseException($e->getMessage(), (int) $e->getCode());
-
-                }
-
-                break;
-
-            case ("DB2"):
-
-                $response = db2_exec($this->dbh, $query);
-
-                if ( !$response )  throw new DatabaseException(db2_stmt_error());
-                
-                break;
-
-            case ("POSTGRESQL"):
-
-                $response = pg_query($this->dbh, $query);
-
-                if ( !$response ) throw new DatabaseException(pg_last_error());
-
-                break;
-                
-            default:
-                
-                throw new DatabaseException('Invalid database model');
-                
-                break;
-
-        }
-
-        return $response;
-        
     }
 
     /**
@@ -359,184 +245,58 @@ class Database {
     }
 
     /**
-     * Get database handler
+     * Shot a query to database and build a result set (QueryResultInterface object).
      *
-     * @return  mixed
+     * @param   string  $statement
+     *
+     * @return  QueryResultInterface
+     * @throws  DatabaseException
      */
-    final public function getHandler() {
+    public function query($statement) {
 
-        return $this->dbh;
+        $model_name = $this->model->getName();
+
+        $handler = $this->model->handler();
+
+        $result_class = "\\Comodojo\\Database\\Results\\".$model_name;
+
+        try {
+
+            $result = $this->rawQuery($query);
+
+            $return = new $result_class($handler, $this->model, $this->fetch, $result);
+
+        } catch (DatabaseException $e) {
+
+            throw $e;
+
+        }
+
+        return $return;
 
     }
 
     /**
-     * Connecto to database
+     * Shot a query to database and return raw data
      *
+     * @param   string  $statement
+     *
+     * @return  resource
+     * @throws  DatabaseException
      */
-    private function connect() {
+    public function rawQuery($statement) {
 
-        switch ( $this->model ) {
+        try {
 
-            case ("MYSQLI"):
-                
-                if ( !class_exists('mysqli') ) throw new DatabaseException('Unsupported database model - '.$this->model);
+            $response = $this->model->query($statement);
 
-                $this->dbh = new \mysqli($this->host, $this->user, $this->pass, $this->name, $this->port);
+        } catch (DatabaseException $de) {
 
-                if ( $this->dbh->connect_error ) throw new DatabaseException($this->dbh->connect_error, $this->dbh->connect_errno);
-
-                break;
-
-            case ("MYSQL_PDO"):
-
-                if ( !in_array('mysql', \PDO::getAvailableDrivers()) ) throw new DatabaseException('Unsupported database model - '.$this->model);
-
-                $dsn = "mysql:host=".$this->host.";port=".$this->port.";dbname=".$this->name;
-                
-                try {
-
-                    $this->dbh = new \PDO($dsn, $this->user, $this->pass, array(\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION));
-
-                } catch (\PDOException $e) {
-                    
-                    throw new DatabaseException($e->getMessage(), $e->getCode());
-                    
-                }
-
-                break;
-
-            case ("ORACLE_PDO"):
-
-                if ( !in_array('oci', \PDO::getAvailableDrivers()) ) throw new DatabaseException('Unsupported database model - '.$this->model);
-
-                $dsn = "oci:dbname=".$this->host.":".$this->port."/".$this->name;
-                
-                try {
-                    
-                    $this->dbh = new \PDO($dsn, $this->user, $this->pass, array(\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION));
-                    
-                } catch (\PDOException $e) {
-                    
-                    throw new DatabaseException($e->getMessage(), $e->getCode());
-                    
-                }
-
-                break;
-
-            case ("SQLITE_PDO"):
-            
-                if ( !in_array('sqlite', \PDO::getAvailableDrivers()) ) throw new DatabaseException('Unsupported database model - '.$this->model);
-
-                $dsn = "sqlite:".$this->name;
-
-                try {
-                    
-                    $this->dbh = new \PDO($dsn, $this->user, $this->pass, array(\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION));
-                    
-                } catch (\PDOException $e) {
-                    
-                    throw new DatabaseException($e->getMessage(), $e->getCode());
-                    
-                }
-
-                break;
-
-            case ("DB2"):
-
-                if ( !function_exists('db2_pconnect') ) throw new DatabaseException('Unsupported database model - '.$this->model);
-
-                $dsn  = "ibm:DRIVER={IBM DB2 ODBC DRIVER};DATABASE=".$this->name;
-                $dsn .= ";HOSTNAME=".$this->host.";PORT=".$this->port.";PROTOCOL=TCPIP;UID=".$this->user.";PWD=".$this->pass.";";
-
-                $this->dbh = db2_pconnect($dsn, $this->user, $this->pass);
-                
-                if ( !$this->dbh ) {
-                    
-                    throw new DatabaseException(db2_conn_errormsg());
-                    
-                }
-
-                break;
-
-            case ("DBLIB_PDO"):
-
-                if ( !in_array('dblib', \PDO::getAvailableDrivers()) ) throw new DatabaseException('Unsupported database model - '.$this->model);
-
-                $dsn = "dblib:host=".$this->host.":".$this->port.";dbname=".$this->name;
-            
-                try {
-                    
-                    $this->dbh = new \PDO($dsn, $this->user, $this->pass, array(\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION));
-                    
-                } catch (\PDOException $e) {
-                    
-                    throw new DatabaseException($e->getMessage(), $e->getCode());
-                    
-                }
-
-                break;
-
-            case ("POSTGRESQL"):
-
-                if ( !function_exists('pg_connect') ) throw new DatabaseException('Unsupported database model - '.$this->model);
-
-                $dsn = "host=".$this->host." port=".$this->port." dbname=".$this->name." user=".$this->user." password=".$this->pass;
-
-                $this->dbh = @pg_connect($dsn);
-                
-                if ( $this->dbh == false ) {
-                    
-                    throw new DatabaseException(pg_last_error());
-                    
-                }
-
-                break;
-
+            throw $de;
         }
 
-    }
-
-    /**
-     * Disconnect from database
-     *
-     */
-    private function disconnect() {
-
-        switch ( $this->model ) {
-            
-            case ("MYSQLI"):
-                
-                if ( $this->dbh !== false ) $this->dbh->close();
-                
-                break;
-            
-            case ("MYSQL_PDO"):
-            case ("ORACLE_PDO"):
-            case ("SQLITE_PDO"):
-            case ("DBLIB_PDO"):
-                
-                $this->dbh = null;
-                
-                break;
-            
-            case ("DB2"):
-                
-                if ( $this->dbh !== false ) db2_close($this->dbh);
-                
-                break;
-            
-            case ("POSTGRESQL"):
-                
-                if ( $this->dbh !== false ) @pg_close($this->dbh);
-                
-                $this->dbh = null;
-                
-                break;
-            
-        }
+        return $response;
 
     }
-
-    
 
 }

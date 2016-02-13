@@ -1,5 +1,6 @@
 <?php namespace Comodojo\Database\Results;
 
+use \Comodojo\Database\Database;
 use \PDO;
 use \PDOStatement;
 
@@ -71,9 +72,9 @@ trait PDOResultTrait {
 
     private static function selectFetchMode($fetch_mode) {
 
-        if ( $fetch_mode == self::FETCH_NUM ) return PDO::FETCH_NUM;
+        if ( $fetch_mode == Database::FETCH_NUM ) return PDO::FETCH_NUM;
 
-        else if ( $fetch_mode == self::FETCH_ASSOC ) return PDO::FETCH_ASSOC;
+        else if ( $fetch_mode == Database::FETCH_ASSOC ) return PDO::FETCH_ASSOC;
 
         else return PDO::FETCH_BOTH;
 

@@ -1,6 +1,7 @@
 <?php namespace Comodojo\Database\Results;
 
 use \Comodojo\Database\Database;
+use \Comodojo\Database\DatabaseException;
 
 /**
  * Results object for PostgreSQL model
@@ -37,13 +38,13 @@ class PostgreSQL extends AbstractQueryResult {
 
             switch ( $this->fetch_mode ) {
 
-                case self::FETCH_NUM:
+                case Database::FETCH_NUM:
 
                     $result[$iterator] = pg_fetch_array($this->raw_data);
 
                     break;
 
-                case self::FETCH_ASSOC:
+                case Database::FETCH_ASSOC:
 
                     $result[$iterator] = pg_fetch_assoc($this->raw_data);
 
@@ -112,7 +113,7 @@ class PostgreSQL extends AbstractQueryResult {
      *
      * @throws  DatabaseException
      */
-    private static function postgresqlLastInsertId(Database $handler) {
+    private static function postgresqlLastInsertId($handler) {
 
         $query = "SELECT lastval()";
 

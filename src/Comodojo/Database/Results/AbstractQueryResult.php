@@ -1,6 +1,5 @@
 <?php namespace Comodojo\Database\Results;
 
-use \Comodojo\Database\Database;
 use \Comodojo\Database\Models\ModelInterface;
 use \Comodojo\Exception\DatabaseException;
 use \Exception;
@@ -24,27 +23,6 @@ use \Exception;
  */
 
 abstract class AbstractQueryResult implements QueryResultInterface {
-
-    /**
-     * Fetch data as numeric array
-     *
-     * @const string
-     */
-    const FETCH_NUM = "NUM";
-
-    /**
-     * Fetch data as associative array
-     *
-     * @const string
-     */
-    const FETCH_ASSOC = "ASSOC";
-
-    /**
-     * Fetch data as both numeric and associative array
-     *
-     * @const string
-     */
-    const FETCH_BOTH = "BOTH";
 
     /**
      * Result's raw data
@@ -79,18 +57,12 @@ abstract class AbstractQueryResult implements QueryResultInterface {
      *
      * @var string
      */
-    protected $fetch_mode = 'ASSOC';
+    protected $fetch_mode;
 
     /**
      * {@inheritDoc}
      */
-    public function __construct(Database $handler, ModelInterface $model, $fetch_mode, $raw_data) {
-
-        if ( !self::checkFetchMode($fetch_mode) ) {
-
-            throw new DatabaseException("Unknown fetch mode");
-
-        }
+    public function __construct($handler, ModelInterface $model, $fetch_mode, $raw_data) {
 
         if ( !$this->checkRawData($raw_data) ) {
 
@@ -102,7 +74,7 @@ abstract class AbstractQueryResult implements QueryResultInterface {
 
         $this->model = $model;
 
-        $this->fetch_mode = strtoupper($fetch_mode);
+        $this->fetch_mode = $fetch_mode;
 
         $this->raw_data = $raw_data;
 
@@ -120,17 +92,6 @@ abstract class AbstractQueryResult implements QueryResultInterface {
     }
 
     /**
-     * Get database handler (alias)
-     *
-     * @return   Database
-     */
-    final public function getHandler() {
-
-        return $this->handler();
-
-    }
-
-    /**
      * Get database model
      *
      * @return  ModelInterface
@@ -138,17 +99,6 @@ abstract class AbstractQueryResult implements QueryResultInterface {
     final public function model() {
 
         return $this->model;
-
-    }
-
-    /**
-     * Get database model (alias)
-     *
-     * @return   ModelInterface
-     */
-    final public function getModel() {
-
-        return $this->model();
 
     }
 
@@ -198,16 +148,5 @@ abstract class AbstractQueryResult implements QueryResultInterface {
      * @return   bool
      */
     abstract public function checkRawData($raw_data);
-
-    /**
-     * Check if fetch mode is supported
-     *
-     * @return   bool
-     */
-    protected static function checkFetchMode($fetch_mode) {
-
-        return in_array(strtoupper($fetch_mode), array("NUM","ASSOC", "BOTH"));
-
-    }
 
 }

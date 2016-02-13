@@ -1,6 +1,5 @@
 <?php namespace Comodojo\Database\Results;
 
-use \Comodojo\Database\Database;
 use \Comodojo\Database\Models\ModelInterface;
 
 /**
@@ -26,20 +25,20 @@ interface QueryResultInterface {
     /**
      * Create the Query Result object
      *
-     * @param   Database        $handler    Database Handler
+     * @param   resource        $handler    Database Handler
      * @param   ModelInterface  $model      Selected Database Model
      * @param   string          $fetch      Fetch Method
      * @param   resource        $resource   Query resource
      *
-     * @throws  \Comodojo\Exception\DatabaseException
+     * @throws  DatabaseException
      */
-    public function __construct(Database $handler, ModelInterface $model, $fetch, $resource);
+    public function __construct($handler, ModelInterface $model, $fetch, $resource);
 
     /**
      * Get result's data as array (indexed according to fetch method selected)
      *
      * @return  array
-     * @throws  \Comodojo\Exception\DatabaseException
+     * @throws  DatabaseException
      */
     public function getData();
 
@@ -54,7 +53,7 @@ interface QueryResultInterface {
      * Get length of resultset
      *
      * @return  int
-     * @throws  \Comodojo\Exception\DatabaseException
+     * @throws  DatabaseException
      */
     public function getLength();
 
@@ -62,7 +61,7 @@ interface QueryResultInterface {
       * Get number of rows affected by query
       *
       * @return  int
-      * @throws  \Comodojo\Exception\DatabaseException
+      * @throws  DatabaseException
       */
      public function getAffectedRows();
 
@@ -70,7 +69,7 @@ interface QueryResultInterface {
      * Get last insert id (if available)
      *
      * @return  int
-     * @throws  \Comodojo\Exception\DatabaseException
+     * @throws  DatabaseException
      */
     public function getInsertId();
 

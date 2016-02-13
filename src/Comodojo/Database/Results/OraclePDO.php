@@ -2,7 +2,6 @@
 
 use \PDO;
 use \PDOException;
-use \Comodojo\Database\Database;
 use \Comodojo\Database\DatabaseException;
 
 /**
@@ -44,7 +43,7 @@ class OraclePDO extends AbstractQueryResult {
      *
      * @throws  DatabaseException
      */
-    private static function oracleLastInsertId(Database $handler) {
+    private static function oracleLastInsertId($handler) {
 
         $query = "SELECT id.currval as id from dual";
 

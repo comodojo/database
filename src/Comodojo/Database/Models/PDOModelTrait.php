@@ -1,11 +1,11 @@
-<?php namespace Comodojo\Database\Results;
+<?php namespace Comodojo\Database\Models;
 
 use \PDO;
 use \PDOException;
-use \Comodojo\Database\DatabaseException;
+use \Comodojo\Exception\DatabaseException;
 
 /**
- * Results object for SQLServerPDO model
+ * Generic PDO model trait
  *
  * @package     Comodojo Spare Parts
  * @author      Marco Giovinazzi <marco.giovinazzi@comodojo.org>
@@ -22,38 +22,50 @@ use \Comodojo\Database\DatabaseException;
  * THE SOFTWARE.
  */
 
-class SQLServerPDO extends AbstractQueryResult {
-
-    use PDOResultTrait;
+trait PDOModelTrait {
 
     /**
      * {@inheritDoc}
      */
-    public function getInsertId() {
+    public function connect($host, $port, $name, $user, $pass) {
 
-        return self::dblibLastInsertId($this->handler);
+        $dsn = self::composeDsn($host, $port, $name);
+
+        try {
+
+            $this->handler = new PDO($dsn, $user, $pass, array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
+
+        } catch (PDOException $e) {
+
+            throw new DatabaseException($e->getMessage(), $e->getCode());
+
+        }
+
+        return $this->handler;
 
     }
 
     /**
-     * Trik to enable last insert id (scope-relative) for dblib PDO, since
-     * lastInsertId() is not supported by driver
-     *
-     * @return  int
-     *
-     * @throws  DatabaseException
+     * {@inheritDoc}
      */
-    private static function dblibLastInsertId($handler) {
+    public function disconnect() {
 
-        $query = "SELECT SCOPE_IDENTITY() as id";
+        $this->handler = null;
+
+        return true;
+
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function query($statement) {
 
         try {
 
-            $response = $handler->prepare($query);
+            $query = $this->handler->prepare($statement);
 
-            $response->execute();
-
-            $id = $response->fetchAll(PDO::FETCH_ASSOC);
+            $query->execute();
 
         } catch (PDOException $e) {
 
@@ -61,7 +73,7 @@ class SQLServerPDO extends AbstractQueryResult {
 
         }
 
-        return is_null($id[0]['id']) ? null : intval($id[0]['id']);
+        return $query;
 
     }
 
