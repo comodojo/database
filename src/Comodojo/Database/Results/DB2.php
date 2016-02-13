@@ -90,7 +90,7 @@ class DB2 extends AbstractQueryResult {
      */
     public function checkRawData($raw_data) {
 
-        return (is_resource($data) && @get_resource_type($data) == "DB2 Statement");
+        return (is_resource($raw_data) && @get_resource_type($raw_data) == "DB2 Statement");
 
     }
 

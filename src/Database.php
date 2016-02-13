@@ -262,7 +262,7 @@ class Database {
 
         try {
 
-            $result = $this->rawQuery($query);
+            $result = $this->rawQuery($statement);
 
             $return = new $result_class($handler, $this->model, $this->fetch, $result);
 

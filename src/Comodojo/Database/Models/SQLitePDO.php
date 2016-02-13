@@ -22,7 +22,6 @@ use \PDO;
 
 class SQLitePDO implements ModelInterface {
 
-    use HandlerTrait;
     use PDOModelTrait;
 
     /**

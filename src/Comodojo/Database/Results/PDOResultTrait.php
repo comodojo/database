@@ -66,7 +66,7 @@ trait PDOResultTrait {
      */
     public function checkRawData($raw_data) {
 
-        return ($data instanceof PDOStatement);
+        return ($raw_data instanceof PDOStatement);
 
     }
 

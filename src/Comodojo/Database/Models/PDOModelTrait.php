@@ -24,6 +24,8 @@ use \Comodojo\Exception\DatabaseException;
 
 trait PDOModelTrait {
 
+    use HandlerTrait;
+    
     /**
      * {@inheritDoc}
      */

@@ -22,7 +22,6 @@ use \PDO;
 
 class MySQLPDO implements ModelInterface {
 
-    use HandlerTrait;
     use PDOModelTrait;
 
     /**

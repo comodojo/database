@@ -22,7 +22,6 @@ use \PDO;
 
 class OraclePDO implements ModelInterface {
 
-    use HandlerTrait;
     use PDOModelTrait;
 
     /**

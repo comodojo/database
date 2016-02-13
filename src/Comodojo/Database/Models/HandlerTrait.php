@@ -23,7 +23,7 @@ trait HandlerTrait {
     /**
      * The database handler
      *
-     * @var object
+     * @var resource
      */
     protected $handler;
 

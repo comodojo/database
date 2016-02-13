@@ -41,7 +41,7 @@ abstract class AbstractQueryResult implements QueryResultInterface {
     /**
      * Database Handler
      *
-     * @var Database
+     * @var resource
      */
     protected $handler;
 

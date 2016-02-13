@@ -1,13 +1,22 @@
 {
     "name": "comodojo/database",
-    "description": "Multi-database library",
+    "description": "Multi-database library with query builder",
     "license": "MIT",
     "type": "library",
     "keywords": [
         "comodojo",
         "database",
-        "query",
-        "builder"
+        "query builder",
+        "mysql",
+        "mysqli",
+        "pdo_oci",
+        "pdo_mysql",
+        "pdo_sqlite",
+        "pgsql",
+        "pdo_dblib",
+        "ms sql server"
+        "ibm_db2",
+        "db2"
     ],
     "homepage": "https://comodojo.org",
      "support": {
@@ -23,16 +32,16 @@
     "autoload": {
         "psr-4": {
             "Comodojo\\Database\\QueryBuilder\\": "src/QueryBuilder",
-            "Comodojo\\Database\\": "src"
+            "Comodojo\\Database\\": "src/Comodojo/Database"
         }
     },
     "require": {
-        "php": ">=5.3.3",
+        "php": ">=5.6.0",
         "comodojo/exceptions": "@stable"
     },
     "require-dev": {
-        "phpunit/phpunit": "~4.0",
-        "scrutinizer/ocular": "~1.1"
+        "phpunit/phpunit": "^4.0|^5.0",
+        "scrutinizer/ocular": "^1.0"
     },
     "suggest": {
         "ext-mysqli": "Support for MySQL 4.1 and above databases",

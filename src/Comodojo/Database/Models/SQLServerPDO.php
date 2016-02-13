@@ -22,7 +22,6 @@ use \PDO;
 
 class SQLServerPDO implements ModelInterface {
 
-    use HandlerTrait;
     use PDOModelTrait;
 
     /**
