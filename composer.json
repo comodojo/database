@@ -14,7 +14,7 @@
         "pdo_sqlite",
         "pgsql",
         "pdo_dblib",
-        "ms sql server"
+        "ms sql server",
         "ibm_db2",
         "db2"
     ],
